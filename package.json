@@ -1,0 +1,25 @@
+{
+  "name": "blog-cms",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A lightweight CMS for reviewing and publishing AI-generated blog posts. Built with React 19, Vite, Tailwind CSS 4, and Supabase.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.102.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "lucide-react": "^1.7.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.14.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.4"
+  }
+}
