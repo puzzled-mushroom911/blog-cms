@@ -33,6 +33,7 @@ When the user references **"CMS"** in conversation, it means this blog CMS and i
 | keywords | text | SEO keywords |
 | content | JSONB | Array of content blocks (paragraph, heading, list, callout, quote, image, table, stat-cards, pros-cons, info-box, process-steps) |
 | status | text | draft, needs-review, published |
+| editor_notes | JSONB | Array of {blockIndex, text, author, createdAt, resolved} — inline comments on content blocks |
 | created_at | timestamptz | Auto-set |
 | updated_at | timestamptz | Auto-set |
 
@@ -135,3 +136,15 @@ When writing blog posts, use these JSONB block types:
 - `{ "type": "table", "headers": ["..."], "rows": [["...", "..."]] }`
 - `{ "type": "stat-cards", "items": [{ "label": "...", "value": "..." }] }`
 - `{ "type": "pros-cons", "pros": ["..."], "cons": ["..."] }`
+
+## Prompt Block Type
+
+The `prompt` block type is a special instruction block for Claude. It appears in the editor with a violet dashed border and is NOT rendered on the public site. Use it to leave instructions within the content for Claude to process.
+
+- `{ "type": "prompt", "text": "Generate a comparison table of flood insurance costs by zone..." }`
+
+## Revalidation
+
+When `VITE_REVALIDATE_URL` is set in `.env`, the CMS will POST to that URL after saving a published post. This triggers ISR cache refresh on the public site so changes appear immediately.
+
+For Next.js sites, set this to: `https://yourdomain.com/admin/api/revalidate`
