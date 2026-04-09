@@ -117,7 +117,7 @@ export default function PostEditor() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-3 min-w-0">
-              <StatusBadge status={post.status} />
+              <StatusBadge status={post.status} date={post.date} />
               <h1 className="text-sm font-semibold text-slate-800 truncate max-w-md">
                 {post.title}
               </h1>

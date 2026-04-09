@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { FileText, Eye, PenTool, AlertCircle, Search } from 'lucide-react';
+import { FileText, Eye, PenTool, AlertCircle, Search, CalendarClock } from 'lucide-react';
 import PostCard from '../components/PostCard';
 
 const STATUS_FILTERS = [
@@ -35,9 +35,11 @@ export default function Dashboard() {
   }
 
   const stats = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
     return {
       total: posts.length,
-      published: posts.filter((p) => p.status === 'published').length,
+      published: posts.filter((p) => p.status === 'published' && (!p.date || p.date <= today)).length,
+      scheduled: posts.filter((p) => p.status === 'published' && p.date > today).length,
       draft: posts.filter((p) => p.status === 'draft').length,
       needsReview: posts.filter((p) => p.status === 'needs-review').length,
     };
@@ -83,7 +85,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <StatCard
           label="Total Posts"
           value={stats.total}
@@ -95,6 +97,12 @@ export default function Dashboard() {
           value={stats.published}
           icon={<Eye className="w-4 h-4" />}
           color="emerald"
+        />
+        <StatCard
+          label="Scheduled"
+          value={stats.scheduled}
+          icon={<CalendarClock className="w-4 h-4" />}
+          color="blue"
         />
         <StatCard
           label="Drafts"
@@ -183,6 +191,7 @@ function StatCard({ label, value, icon, color }) {
   const colors = {
     slate: 'bg-slate-50 text-slate-600 border-slate-100',
     emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    blue: 'bg-blue-50 text-blue-600 border-blue-100',
     amber: 'bg-amber-50 text-amber-600 border-amber-100',
   };
 

@@ -65,7 +65,7 @@ export default function PostCard({ post }) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <StatusBadge status={post.status} />
+            <StatusBadge status={post.status} date={post.date} />
             <span className="text-xs text-slate-400">{post.category}</span>
           </div>
           <h3 className="text-sm font-semibold text-slate-800 truncate">
