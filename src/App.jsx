@@ -5,6 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import PostEditor from './pages/PostEditor';
+import Topics from './pages/Topics';
+import TopicDetail from './pages/TopicDetail';
 import Settings from './pages/Settings';
 
 export default function App() {
@@ -30,6 +32,8 @@ export default function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="posts/:id" element={<PostEditor />} />
+        <Route path="topics" element={<Topics />} />
+        <Route path="topics/:id" element={<TopicDetail />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

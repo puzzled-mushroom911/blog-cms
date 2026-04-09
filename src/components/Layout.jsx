@@ -9,10 +9,12 @@ import {
   PanelLeftClose,
   PanelLeft,
   FileText,
+  Lightbulb,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/topics', label: 'Topics', icon: Lightbulb },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
