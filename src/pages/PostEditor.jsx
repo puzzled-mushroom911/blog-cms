@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
 import StatusBadge from '../components/StatusBadge';
-import { ArrowLeft, Save, PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning } from 'lucide-react';
 
 export default function PostEditor() {
   const { id } = useParams();
@@ -15,6 +15,9 @@ export default function PostEditor() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [editorNotes, setEditorNotes] = useState([]);
 
   useEffect(() => {
     loadPost();
@@ -33,7 +36,51 @@ export default function PostEditor() {
       return;
     }
     setPost(data);
+    setEditorNotes(Array.isArray(data.editor_notes) ? data.editor_notes : []);
     setLoading(false);
+  }
+
+  async function saveNotes(notes) {
+    if (!post) return;
+    await supabase
+      .from('blog_posts')
+      .update({ editor_notes: notes })
+      .eq('id', post.id);
+  }
+
+  function handleAddNote(blockIndex, text) {
+    const note = {
+      blockIndex,
+      text,
+      author: 'Editor',
+      createdAt: new Date().toISOString(),
+      resolved: false,
+    };
+    const updated = [...editorNotes, note];
+    setEditorNotes(updated);
+    saveNotes(updated);
+  }
+
+  function handleToggleResolved(blockIndex, noteCreatedAt) {
+    const updated = editorNotes.map((n) =>
+      n.blockIndex === blockIndex && n.createdAt === noteCreatedAt
+        ? { ...n, resolved: !n.resolved }
+        : n
+    );
+    setEditorNotes(updated);
+    saveNotes(updated);
+  }
+
+  const unresolvedNoteCount = editorNotes.filter((n) => !n.resolved).length;
+
+  function scrollToFirstUnresolved() {
+    const firstUnresolved = editorNotes.find((n) => !n.resolved);
+    if (!firstUnresolved) return;
+    const blockElements = document.querySelectorAll('[data-block-index]');
+    const target = Array.from(blockElements).find(
+      (el) => el.getAttribute('data-block-index') === String(firstUnresolved.blockIndex)
+    );
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   async function handleSave() {
@@ -74,6 +121,7 @@ export default function PostEditor() {
         setSaveMessage('Saved');
       }
       setTimeout(() => setSaveMessage(''), 3000);
+      revalidateBlog(post.slug);
     }
   }
 
@@ -87,10 +135,55 @@ export default function PostEditor() {
     }
   }
 
+  async function revalidateBlog(slug) {
+    const revalidateUrl = import.meta.env.VITE_REVALIDATE_URL;
+    if (!revalidateUrl) return;
+    try {
+      await fetch(revalidateUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ slug }),
+      });
+    } catch {
+      // Revalidation is best-effort
+    }
+  }
+
   function handleInlineEdit(blockIndex, field, value) {
     const content = [...post.content];
     content[blockIndex] = { ...content[blockIndex], [field]: value };
     setPost({ ...post, content });
+  }
+
+  function handleInsertBlock(index, block) {
+    if (!post) return;
+    const content = [...post.content];
+    content.splice(index, 0, block);
+    setPost({ ...post, content });
+  }
+
+  function handleRemoveBlock(index) {
+    if (!post) return;
+    const content = [...post.content];
+    content.splice(index, 1);
+    setPost({ ...post, content });
+  }
+
+  async function handleDelete() {
+    if (!post) return;
+    setDeleting(true);
+    const { error } = await supabase
+      .from('blog_posts')
+      .delete()
+      .eq('id', post.id);
+    setDeleting(false);
+    if (!error) {
+      navigate('/');
+    } else {
+      setSaveMessage('Error deleting: ' + error.message);
+      setShowDeleteConfirm(false);
+    }
   }
 
   if (loading) {
@@ -134,6 +227,36 @@ export default function PostEditor() {
                 {saveMessage}
               </span>
             )}
+            {/* Delete button */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
+                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                title="Delete post"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+              {showDeleteConfirm && (
+                <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-50 w-64">
+                  <p className="text-sm text-slate-700 mb-3">Delete this post permanently?</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      className="flex-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {deleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="flex-1 px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             <button
               onClick={handleSave}
               disabled={saving}
@@ -178,11 +301,29 @@ export default function PostEditor() {
               {post.author} &middot; {post.date} &middot; {post.read_time}
             </p>
 
+            {/* Unresolved notes banner */}
+            {unresolvedNoteCount > 0 && (
+              <button
+                type="button"
+                onClick={scrollToFirstUnresolved}
+                className="w-full mb-6 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium hover:bg-amber-100 transition-colors"
+              >
+                <MessageSquareWarning className="w-4 h-4 flex-shrink-0" />
+                {unresolvedNoteCount} unresolved note{unresolvedNoteCount > 1 ? 's' : ''} — click to jump to first
+              </button>
+            )}
+
             {/* Content blocks */}
             <ContentRenderer
               content={post.content}
               editable={true}
               onInlineEdit={handleInlineEdit}
+              onInsertBlock={handleInsertBlock}
+              onRemoveBlock={handleRemoveBlock}
+              slug={post.slug}
+              editorNotes={editorNotes}
+              onAddNote={handleAddNote}
+              onToggleResolved={handleToggleResolved}
             />
           </div>
         </div>
