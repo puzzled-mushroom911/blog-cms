@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Save, ExternalLink } from 'lucide-react';
 import { getConfig } from '../config';
+import ImageUpload from './ImageUpload';
 
 const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
@@ -229,24 +230,28 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
           </p>
         </div>
 
-        {/* Image URL */}
+        {/* Featured Image Upload */}
+        <ImageUpload
+          label="Featured Image"
+          value={post.image || ''}
+          slug={post.slug || 'untitled'}
+          previewHeight="h-32"
+          onUpload={(url) => handleChange('image', url)}
+          onRemove={() => handleChange('image', '')}
+        />
+
+        {/* Manual image URL fallback */}
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1.5">
-            Featured Image URL
+            Image URL <span className="text-slate-400 font-normal">(or paste)</span>
           </label>
           <input
             type="text"
             value={post.image || ''}
             onChange={(e) => handleChange('image', e.target.value)}
+            placeholder="https://..."
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
-          {post.image && (
-            <img
-              src={post.image}
-              alt="Preview"
-              className="mt-2 w-full h-32 object-cover rounded-lg border border-slate-100"
-            />
-          )}
         </div>
 
         {/* YouTube ID */}
