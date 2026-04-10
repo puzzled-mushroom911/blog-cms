@@ -78,9 +78,9 @@ export default function Dashboard() {
     <div className="p-6 lg:p-8 max-w-5xl">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Blog Posts</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Manage your blog posts
+          Review and publish your blog content
         </p>
       </div>
 

@@ -16,10 +16,10 @@ import {
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/topics', label: 'Topics', icon: Lightbulb },
+  { to: '/', label: 'Blog Posts', icon: LayoutDashboard, end: true },
+  { to: '/topics', label: 'Content Pipeline', icon: Lightbulb },
   { to: '/seo-pages', label: 'SEO Pages', icon: Globe },
-  { to: '/approval', label: 'Approval Queue', icon: Inbox },
+  { to: '/approval', label: 'HITL Queue', icon: Inbox },
   { to: '/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];

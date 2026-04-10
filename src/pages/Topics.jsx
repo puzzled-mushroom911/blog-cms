@@ -114,9 +114,9 @@ export default function Topics() {
     <div className="p-6 lg:p-8 max-w-5xl">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Topics</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Content Pipeline</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Review and approve researched blog topics
+          Review and approve researched topics — approved topics become blog posts or SEO pages
         </p>
       </div>
 

@@ -136,7 +136,7 @@ export default function ApprovalQueue() {
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Inbox className="w-5 h-5" />
-            Approval Queue
+            HITL Queue
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
             {pages.length} page{pages.length !== 1 ? 's' : ''} awaiting review
