@@ -10,20 +10,20 @@
 
 // ---- EDIT THESE FOR YOUR BRAND ----
 const defaults = {
-  siteName: 'Your Brand Name',
-  siteUrl: 'https://yourdomain.com',
-  defaultAuthor: 'Your Name',
-  cmsTitle: 'Blog CMS',
+  siteName: 'Living in St. Pete',
+  siteUrl: 'https://livinginstpetefl.com',
+  defaultAuthor: 'Aaron & Aubrey Chand',
+  cmsTitle: 'LIT Blog CMS',
   blogPathPrefix: '/blog',       // path on the public site where posts live
-  youtubeChannel: '',            // your YouTube channel URL (optional)
+  youtubeChannel: 'https://www.youtube.com/@livinginst-pete',
   pexelsApiKey: '',              // Pexels API key for stock image search
-  categories: ['General', 'How-To', 'Guide', 'Review', 'News', 'Tips', 'Case Study', 'Comparison'],
+  categories: ['Neighborhoods', 'Market Update', 'Home Buying', 'Relocation', 'Lifestyle', 'How-To', 'Comparison', 'News'],
   pageTypes: [
-    { value: 'landing', label: 'Landing Page', color: 'bg-blue-50 text-blue-700' },
-    { value: 'comparison', label: 'Comparison', color: 'bg-purple-50 text-purple-700' },
-    { value: 'location', label: 'Location', color: 'bg-amber-50 text-amber-700' },
-    { value: 'guide', label: 'Guide', color: 'bg-emerald-50 text-emerald-700' },
-    { value: 'faq', label: 'FAQ', color: 'bg-rose-50 text-rose-700' },
+    { value: 'moving-from', label: 'Moving From', color: 'bg-blue-50 text-blue-700' },
+    { value: 'compare', label: 'Compare', color: 'bg-purple-50 text-purple-700' },
+    { value: 'zip-code', label: 'Zip Code', color: 'bg-amber-50 text-amber-700' },
+    { value: 'neighborhood', label: 'Neighborhood', color: 'bg-emerald-50 text-emerald-700' },
+    { value: 'schools', label: 'Schools', color: 'bg-rose-50 text-rose-700' },
   ],
 };
 
