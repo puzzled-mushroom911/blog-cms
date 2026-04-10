@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
 import StatusBadge from '../components/StatusBadge';
-import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning } from 'lucide-react';
+import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning, CheckCircle } from 'lucide-react';
 
 export default function PostEditor() {
   const { id } = useParams();
@@ -81,6 +81,44 @@ export default function PostEditor() {
       (el) => el.getAttribute('data-block-index') === String(firstUnresolved.blockIndex)
     );
     target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function handlePublish() {
+    if (!post) return;
+    setSaving(true);
+    setSaveMessage('');
+
+    const { error } = await supabase
+      .from('blog_posts')
+      .update({
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        date: post.date || new Date().toISOString().split('T')[0],
+        read_time: post.read_time,
+        author: post.author,
+        category: post.category,
+        tags: post.tags,
+        youtube_id: post.youtube_id,
+        image: post.image,
+        meta_description: post.meta_description,
+        keywords: post.keywords,
+        content: post.content,
+        status: 'published',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', post.id);
+
+    setSaving(false);
+    if (error) {
+      setSaveMessage('Error publishing: ' + error.message);
+    } else {
+      setPost(prev => ({ ...prev, status: 'published' }));
+      triggerDeploy();
+      revalidateBlog(post.slug);
+      setSaveMessage('Published & deploy triggered');
+      setTimeout(() => setSaveMessage(''), 3000);
+    }
   }
 
   async function handleSave() {
@@ -257,6 +295,16 @@ export default function PostEditor() {
                 </div>
               )}
             </div>
+            {post.status !== 'published' && (
+              <button
+                onClick={handlePublish}
+                disabled={saving}
+                className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              >
+                <CheckCircle className="w-4 h-4" />
+                {saving ? 'Publishing...' : 'Publish'}
+              </button>
+            )}
             <button
               onClick={handleSave}
               disabled={saving}
