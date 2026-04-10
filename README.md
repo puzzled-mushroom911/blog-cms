@@ -2,7 +2,7 @@
 
 A lightweight, human-in-the-loop content management system for reviewing and publishing AI-generated blog posts and SEO pages. Built for small business owners whose teams may not use AI directly — Claude Code (or any AI tool) creates content, and your team reviews and approves it before it goes live.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/blog-cms)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/puzzled-mushroom911/blog-cms)
 
 **Stack:** React 19 + Vite + Tailwind CSS 4 + Supabase (all free tier)
 
@@ -37,7 +37,7 @@ This CMS sits between AI-generated content and your live website. Claude Code (o
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/blog-cms.git
+git clone https://github.com/puzzled-mushroom911/blog-cms.git
 cd blog-cms
 ```
 
