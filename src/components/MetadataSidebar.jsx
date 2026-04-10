@@ -115,7 +115,7 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 bg-white"
           >
             <option value="">Select category</option>
-            {CATEGORY_OPTIONS.map((cat) => (
+            {categories.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
               </option>
