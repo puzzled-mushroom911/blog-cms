@@ -23,7 +23,9 @@ import {
   X,
 } from "lucide-react";
 import ImageUpload from "./ImageUpload";
+import PexelsSearch from "./PexelsSearch";
 import BlockNotes from "./BlockNotes";
+import { getConfig } from "../config";
 
 export default function ContentRenderer({
   content,
@@ -325,35 +327,74 @@ function BlockInserter({ index, slug, onInsertBlock }) {
             </div>
           )}
 
-          {/* Image upload */}
+          {/* Image upload + Pexels */}
           {activeType === "image" && (
-            <div className="p-3 space-y-2">
-              <ImageUpload
-                slug={slug}
-                previewHeight="h-32"
-                onUpload={(url) => {
-                  onInsertBlock(index, {
-                    type: "image",
-                    src: url,
-                    alt: "",
-                    caption: "",
-                  });
-                  reset();
-                }}
-              />
-              <div className="flex justify-start">
-                <button
-                  type="button"
-                  onClick={() => setActiveType(null)}
-                  className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
-                >
-                  Back
-                </button>
-              </div>
-            </div>
+            <ImageInserter
+              slug={slug}
+              index={index}
+              onInsertBlock={onInsertBlock}
+              onBack={() => setActiveType(null)}
+              onDone={reset}
+            />
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function ImageInserter({ slug, index, onInsertBlock, onBack, onDone }) {
+  const [tab, setTab] = useState("upload");
+  const { pexelsApiKey } = getConfig();
+
+  function handleImageSelected(url) {
+    onInsertBlock(index, { type: "image", src: url, alt: "", caption: "" });
+    onDone();
+  }
+
+  return (
+    <div className="p-3 space-y-2">
+      {/* Tabs: Upload / Pexels */}
+      <div className="flex gap-1 bg-slate-100 rounded-lg p-0.5">
+        <button
+          type="button"
+          onClick={() => setTab("upload")}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            tab === "upload" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          Upload
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("pexels")}
+          disabled={!pexelsApiKey}
+          title={!pexelsApiKey ? "Add a Pexels API key in Settings" : "Search free stock photos"}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            tab === "pexels" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+          } disabled:opacity-40 disabled:cursor-not-allowed`}
+        >
+          Pexels
+        </button>
+      </div>
+
+      {tab === "upload" && (
+        <ImageUpload slug={slug} previewHeight="h-32" onUpload={handleImageSelected} />
+      )}
+
+      {tab === "pexels" && pexelsApiKey && (
+        <PexelsSearch apiKey={pexelsApiKey} onSelect={handleImageSelected} />
+      )}
+
+      <div className="flex justify-start">
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
+        >
+          Back
+        </button>
+      </div>
     </div>
   );
 }
