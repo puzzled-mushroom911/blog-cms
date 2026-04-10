@@ -219,11 +219,17 @@ export default function Topics() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
           <Lightbulb className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-sm text-slate-500 font-medium">No topics found</p>
+          <p className="text-sm text-slate-500 font-medium">No topics yet.</p>
           <p className="text-xs text-slate-400 mt-1">
             {searchQuery || statusFilter !== 'all'
               ? 'Try adjusting your filters'
-              : 'Topics will appear here once Claude researches them'}
+              : (
+                <span className="block mt-2 text-slate-400">
+                  Your AI assistant researches keywords and adds topics here for you to review.<br />
+                  Approve topics you like — your assistant will write the content. Discard the rest.
+                </span>
+              )
+            }
           </p>
         </div>
       ) : (

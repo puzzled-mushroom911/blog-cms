@@ -135,7 +135,8 @@ export default function SeoPages() {
           <Globe className="w-10 h-10 text-slate-300 mx-auto mb-3" />
           <p className="text-slate-500 text-sm">No SEO pages yet.</p>
           <p className="text-slate-400 text-xs mt-1">
-            Run the programmatic SEO workflow to generate pages.
+            Your AI assistant generates these pages automatically from approved topics.<br />
+            Once created, they'll appear here for your review before going live.
           </p>
         </div>
       ) : (

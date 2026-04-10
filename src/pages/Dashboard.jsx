@@ -173,7 +173,13 @@ export default function Dashboard() {
           <p className="text-xs text-slate-400 mt-1">
             {searchQuery || statusFilter !== 'all'
               ? 'Try adjusting your filters'
-              : 'Posts will appear here once added to Supabase'}
+              : (
+                <span className="block mt-2 text-slate-400">
+                  Blog posts created by your AI assistant will appear here for review.<br />
+                  Use the sidebar to navigate to <strong className="text-slate-500">Topics</strong> for keyword research or <strong className="text-slate-500">SEO Pages</strong> for programmatic content.
+                </span>
+              )
+            }
           </p>
         </div>
       ) : (
