@@ -42,6 +42,26 @@ export default function SeoPageEditor() {
     setPage(prev => ({ ...prev, [field]: value }));
   }
 
+  function handleInlineEdit(blockIndex, field, value) {
+    const content = [...page.content];
+    content[blockIndex] = { ...content[blockIndex], [field]: value };
+    setPage(prev => ({ ...prev, content }));
+  }
+
+  function handleInsertBlock(index, block) {
+    if (!page) return;
+    const content = [...page.content];
+    content.splice(index, 0, block);
+    setPage(prev => ({ ...prev, content }));
+  }
+
+  function handleRemoveBlock(index) {
+    if (!page) return;
+    const content = [...page.content];
+    content.splice(index, 1);
+    setPage(prev => ({ ...prev, content }));
+  }
+
   async function handleSave() {
     setSaving(true);
     try {
@@ -152,7 +172,14 @@ export default function SeoPageEditor() {
               <p className="text-sm text-slate-500 mb-6 italic">{page.meta_description}</p>
             )}
             {Array.isArray(page.content) && page.content.length > 0 ? (
-              <ContentRenderer content={page.content} />
+              <ContentRenderer
+                content={page.content}
+                editable={true}
+                onInlineEdit={handleInlineEdit}
+                onInsertBlock={handleInsertBlock}
+                onRemoveBlock={handleRemoveBlock}
+                slug={page.slug}
+              />
             ) : (
               <p className="text-slate-400 text-sm italic">No content blocks yet.</p>
             )}
