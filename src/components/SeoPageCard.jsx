@@ -1,26 +1,13 @@
 import { Link } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
+import { getConfig } from '../config';
 import { Globe, Calendar, ArrowRight } from 'lucide-react';
 
-const PAGE_TYPE_LABELS = {
-  'moving-from': 'Moving From',
-  'compare': 'Compare',
-  'zip-code': 'Zip Code',
-  'neighborhood': 'Neighborhood',
-  'schools': 'Schools',
-};
-
-const PAGE_TYPE_COLORS = {
-  'moving-from': 'bg-blue-50 text-blue-700',
-  'compare': 'bg-purple-50 text-purple-700',
-  'zip-code': 'bg-amber-50 text-amber-700',
-  'neighborhood': 'bg-emerald-50 text-emerald-700',
-  'schools': 'bg-rose-50 text-rose-700',
-};
-
 export default function SeoPageCard({ page }) {
-  const typeLabel = PAGE_TYPE_LABELS[page.page_type] || page.page_type;
-  const typeColor = PAGE_TYPE_COLORS[page.page_type] || 'bg-slate-50 text-slate-700';
+  const { pageTypes } = getConfig();
+  const typeConfig = pageTypes.find((t) => t.value === page.page_type);
+  const typeLabel = typeConfig?.label || page.page_type;
+  const typeColor = typeConfig?.color || 'bg-slate-50 text-slate-700';
 
   return (
     <Link

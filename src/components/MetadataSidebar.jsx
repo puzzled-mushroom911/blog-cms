@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Save, ExternalLink } from 'lucide-react';
+import { Save, ExternalLink, Camera } from 'lucide-react';
 import { getConfig } from '../config';
 import ImageUpload from './ImageUpload';
+import PexelsSearch from './PexelsSearch';
 
 const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
@@ -9,21 +10,10 @@ const STATUS_OPTIONS = [
   { value: 'published', label: 'Published' },
 ];
 
-// Default categories -- edit these to match your content topics
-const CATEGORY_OPTIONS = [
-  'General',
-  'How-To',
-  'Guide',
-  'Review',
-  'News',
-  'Tips',
-  'Case Study',
-  'Comparison',
-];
-
 export default function MetadataSidebar({ post, onChange, onSave, saving }) {
   const [tagsInput, setTagsInput] = useState(post.tags?.join(', ') || '');
   const config = getConfig();
+  const { categories } = config;
 
   function handleChange(field, value) {
     onChange({ ...post, [field]: value });
@@ -240,6 +230,18 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
           onRemove={() => handleChange('image', '')}
         />
 
+        {/* Pexels stock image search */}
+        {(() => {
+          const config = getConfig();
+          if (!config.pexelsApiKey) return null;
+          return (
+            <PexelsButton
+              apiKey={config.pexelsApiKey}
+              onSelect={(url) => handleChange('image', url)}
+            />
+          );
+        })()}
+
         {/* Manual image URL fallback */}
         <div>
           <label className="block text-xs font-medium text-slate-500 mb-1.5">
@@ -281,5 +283,28 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
         </button>
       </div>
     </div>
+  );
+}
+
+function PexelsButton({ apiKey, onSelect }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-slate-300 rounded-lg text-xs font-medium text-slate-500 hover:border-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors"
+      >
+        <Camera className="w-3.5 h-3.5" />
+        Search Pexels
+      </button>
+      {open && (
+        <PexelsSearch
+          apiKey={apiKey}
+          onSelect={onSelect}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
   );
 }

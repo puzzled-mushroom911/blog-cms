@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchSeoPages } from '../lib/seoPages';
 import SeoPageCard from '../components/SeoPageCard';
+import { getConfig } from '../config';
 import { Search, Filter, Globe, Loader2 } from 'lucide-react';
 
 const STATUS_FILTERS = [
@@ -10,16 +11,12 @@ const STATUS_FILTERS = [
   { value: 'published', label: 'Published' },
 ];
 
-const TYPE_FILTERS = [
-  { value: '', label: 'All Types' },
-  { value: 'moving-from', label: 'Moving From' },
-  { value: 'compare', label: 'Compare' },
-  { value: 'zip-code', label: 'Zip Code' },
-  { value: 'neighborhood', label: 'Neighborhood' },
-  { value: 'schools', label: 'Schools' },
-];
-
 export default function SeoPages() {
+  const { pageTypes } = getConfig();
+  const typeFilters = [
+    { value: '', label: 'All Types' },
+    ...pageTypes.map((t) => ({ value: t.value, label: t.label })),
+  ];
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -117,7 +114,7 @@ export default function SeoPages() {
           onChange={e => setTypeFilter(e.target.value)}
           className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         >
-          {TYPE_FILTERS.map(f => (
+          {typeFilters.map(f => (
             <option key={f.value} value={f.value}>{f.label}</option>
           ))}
         </select>

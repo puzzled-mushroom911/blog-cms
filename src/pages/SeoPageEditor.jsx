@@ -3,15 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchSeoPageById, updateSeoPage, deleteSeoPage, approveSeoPage } from '../lib/seoPages';
 import ContentRenderer from '../components/ContentRenderer';
 import StatusBadge from '../components/StatusBadge';
+import { getConfig } from '../config';
 import {
   ArrowLeft, Save, Trash2, CheckCircle, Loader2, Globe,
   Calendar, Eye, PanelRight, PanelRightClose,
 } from 'lucide-react';
 
-const PAGE_TYPES = ['moving-from', 'compare', 'zip-code', 'neighborhood', 'schools'];
 const STATUS_OPTIONS = ['draft', 'needs-review', 'published'];
 
 export default function SeoPageEditor() {
+  const { pageTypes } = getConfig();
   const { id } = useParams();
   const navigate = useNavigate();
   const [page, setPage] = useState(null);
@@ -91,9 +92,7 @@ export default function SeoPageEditor() {
     );
   }
 
-  const previewUrl = page.page_type === 'moving-from'
-    ? `/moving-from/${page.slug}`
-    : `/${page.page_type}/${page.slug}`;
+  const previewUrl = `/${page.page_type}/${page.slug}`;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -199,8 +198,8 @@ export default function SeoPageEditor() {
                 onChange={e => updateField('page_type', e.target.value)}
                 className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
               >
-                {PAGE_TYPES.map(t => (
-                  <option key={t} value={t}>{t}</option>
+                {pageTypes.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
             </label>

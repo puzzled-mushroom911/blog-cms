@@ -76,6 +76,68 @@ export default function Settings() {
           placeholder="/blog"
         />
 
+        {/* Categories */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Blog Categories
+          </label>
+          <p className="text-xs text-slate-400 mb-1.5">
+            Comma-separated list of categories for blog posts
+          </p>
+          <input
+            type="text"
+            value={(values.categories || []).join(', ')}
+            onChange={(e) =>
+              handleChange(
+                'categories',
+                e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+              )
+            }
+            placeholder="General, How-To, Guide, Review"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-colors"
+          />
+        </div>
+
+        {/* SEO Page Types */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            SEO Page Types
+          </label>
+          <p className="text-xs text-slate-400 mb-1.5">
+            One per line, format: <code className="bg-slate-100 px-1 rounded">slug: Display Name</code>
+          </p>
+          <textarea
+            value={(values.pageTypes || []).map((t) => `${t.value}: ${t.label}`).join('\n')}
+            onChange={(e) => {
+              const colors = [
+                'bg-blue-50 text-blue-700',
+                'bg-purple-50 text-purple-700',
+                'bg-amber-50 text-amber-700',
+                'bg-emerald-50 text-emerald-700',
+                'bg-rose-50 text-rose-700',
+                'bg-cyan-50 text-cyan-700',
+              ];
+              const types = e.target.value
+                .split('\n')
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .map((line, i) => {
+                  const [value, ...rest] = line.split(':');
+                  const label = rest.join(':').trim() || value.trim();
+                  return {
+                    value: value.trim().toLowerCase().replace(/\s+/g, '-'),
+                    label,
+                    color: colors[i % colors.length],
+                  };
+                });
+              handleChange('pageTypes', types);
+            }}
+            rows={5}
+            placeholder={"landing: Landing Page\ncomparison: Comparison\nguide: Guide"}
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-colors resize-none"
+          />
+        </div>
+
         {/* YouTube channel */}
         <Field
           label="YouTube Channel URL"
@@ -84,6 +146,38 @@ export default function Settings() {
           onChange={(v) => handleChange('youtubeChannel', v)}
           placeholder="https://youtube.com/@yourchannel"
         />
+
+        {/* Integrations divider */}
+        <div className="pt-2 border-t border-slate-100">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
+            Integrations
+          </p>
+        </div>
+
+        {/* Pexels API Key */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Pexels API Key
+          </label>
+          <p className="text-xs text-slate-400 mb-1.5">
+            Enables stock image search in the post editor.{' '}
+            <a
+              href="https://www.pexels.com/api/new/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-600"
+            >
+              Get a free key
+            </a>
+          </p>
+          <input
+            type="password"
+            value={values.pexelsApiKey || ''}
+            onChange={(e) => handleChange('pexelsApiKey', e.target.value)}
+            placeholder="Enter your Pexels API key"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-colors"
+          />
+        </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3 pt-4 border-t border-slate-100">

@@ -16,6 +16,15 @@ const defaults = {
   cmsTitle: 'Blog CMS',
   blogPathPrefix: '/blog',       // path on the public site where posts live
   youtubeChannel: '',            // your YouTube channel URL (optional)
+  pexelsApiKey: '',              // Pexels API key for stock image search
+  categories: ['General', 'How-To', 'Guide', 'Review', 'News', 'Tips', 'Case Study', 'Comparison'],
+  pageTypes: [
+    { value: 'landing', label: 'Landing Page', color: 'bg-blue-50 text-blue-700' },
+    { value: 'comparison', label: 'Comparison', color: 'bg-purple-50 text-purple-700' },
+    { value: 'location', label: 'Location', color: 'bg-amber-50 text-amber-700' },
+    { value: 'guide', label: 'Guide', color: 'bg-emerald-50 text-emerald-700' },
+    { value: 'faq', label: 'FAQ', color: 'bg-rose-50 text-rose-700' },
+  ],
 };
 
 const STORAGE_KEY = 'blog-cms-config';
