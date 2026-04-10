@@ -8,6 +8,10 @@ import PostEditor from './pages/PostEditor';
 import Topics from './pages/Topics';
 import TopicDetail from './pages/TopicDetail';
 import Settings from './pages/Settings';
+import SeoPages from './pages/SeoPages';
+import SeoPageEditor from './pages/SeoPageEditor';
+import ApprovalQueue from './pages/ApprovalQueue';
+import Calendar from './pages/Calendar';
 
 export default function App() {
   const { loading } = useAuth();
@@ -35,6 +39,10 @@ export default function App() {
         <Route path="topics" element={<Topics />} />
         <Route path="topics/:id" element={<TopicDetail />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="seo-pages" element={<SeoPages />} />
+        <Route path="seo-pages/:id" element={<SeoPageEditor />} />
+        <Route path="approval" element={<ApprovalQueue />} />
+        <Route path="calendar" element={<Calendar />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

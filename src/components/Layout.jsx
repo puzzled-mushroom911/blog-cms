@@ -10,11 +10,17 @@ import {
   PanelLeft,
   FileText,
   Lightbulb,
+  Globe,
+  Inbox,
+  CalendarDays,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/topics', label: 'Topics', icon: Lightbulb },
+  { to: '/seo-pages', label: 'SEO Pages', icon: Globe },
+  { to: '/approval', label: 'Approval Queue', icon: Inbox },
+  { to: '/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
