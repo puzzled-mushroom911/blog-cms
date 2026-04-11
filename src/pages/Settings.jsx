@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { getConfig, saveConfig } from '../config';
 import { toast } from 'sonner';
-import { Save, RotateCcw } from 'lucide-react';
+import { Save, RotateCcw, Database, Unplug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useConnection } from '../contexts/ConnectionContext';
+import { useNavigate } from 'react-router-dom';
+import { getStoredConnection } from '../lib/supabase';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
 export default function Settings() {
   const [values, setValues] = useState(getConfig);
+  const { disconnect } = useConnection();
+  const navigate = useNavigate();
+  const connection = getStoredConnection();
 
   function handleChange(field, value) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -33,6 +39,32 @@ export default function Settings() {
         <p className="text-sm text-slate-500 mt-1">
           Configure your brand and site details. Changes are saved to your browser.
         </p>
+      </div>
+
+      {/* Database Connection */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Database className="w-5 h-5 text-emerald-600" />
+          <div>
+            <h2 className="font-semibold text-slate-900 text-sm">Database Connection</h2>
+            <p className="text-xs text-slate-500">Connected to your Supabase project</p>
+          </div>
+        </div>
+        <div className="bg-slate-50 rounded-lg px-4 py-3 mb-4">
+          <p className="text-xs text-slate-400 mb-0.5">Project URL</p>
+          <p className="text-sm text-slate-700 font-mono">{connection?.url || 'Unknown'}</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            disconnect();
+            navigate('/connect');
+          }}
+        >
+          <Unplug className="w-3.5 h-3.5" />
+          Disconnect
+        </Button>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
