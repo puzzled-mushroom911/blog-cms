@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../lib/supabase';
+import { useSupabase } from '../hooks/useSupabase';
 import { FileText, Eye, PenTool, AlertCircle, Search, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +15,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function Dashboard() {
+  const supabase = useSupabase();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');

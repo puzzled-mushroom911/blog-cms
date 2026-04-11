@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useSupabase } from '../hooks/useSupabase';
 import { toast } from 'sonner';
 import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
 import StatusBadge from '../components/StatusBadge';
 import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning, CheckCircle } from 'lucide-react';
+import { captureFeedback } from '../lib/feedback';
 import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter,
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 
 export default function PostEditor() {
+  const supabase = useSupabase();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -23,6 +25,7 @@ export default function PostEditor() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editorNotes, setEditorNotes] = useState([]);
+  const [originalContent, setOriginalContent] = useState(null);
 
   useEffect(() => {
     loadPost();
@@ -41,6 +44,10 @@ export default function PostEditor() {
       return;
     }
     setPost(data);
+    // Store the AI's original content for feedback diffing
+    if (data.original_content) {
+      setOriginalContent(data.original_content);
+    }
     setEditorNotes(Array.isArray(data.editor_notes) ? data.editor_notes : []);
     setLoading(false);
   }
@@ -118,6 +125,11 @@ export default function PostEditor() {
       toast.error('Failed to publish: ' + error.message);
     } else {
       setPost(prev => ({ ...prev, status: 'published' }));
+      // Capture feedback from edits + notes (async, non-blocking)
+      if (originalContent) {
+        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes)
+          .catch(() => {}); // Best-effort — don't block publish
+      }
       triggerDeploy();
       revalidateBlog(post.slug);
       toast.success('Published & deploy triggered');
@@ -153,6 +165,11 @@ export default function PostEditor() {
     if (error) {
       toast.error('Failed to save: ' + error.message);
     } else {
+      // Capture feedback from edits + notes (async, non-blocking)
+      if (originalContent) {
+        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes)
+          .catch(() => {}); // Best-effort — don't block save
+      }
       // Trigger site rebuild when a post is published
       if (post.status === 'published') {
         triggerDeploy();

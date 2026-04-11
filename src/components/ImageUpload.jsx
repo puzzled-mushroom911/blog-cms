@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { Upload, X, Loader2, ImageIcon } from "lucide-react";
-import { supabase } from '../lib/supabase';
+import { getClient } from '../lib/supabase';
 
 export default function ImageUpload({
   value,
@@ -21,6 +21,7 @@ export default function ImageUpload({
 
   const uploadFile = useCallback(
     async (file) => {
+      const supabase = getClient();
       if (!supabase) {
         setError("Supabase not configured");
         return;

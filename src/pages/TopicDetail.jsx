@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useSupabase } from '../hooks/useSupabase';
 import { toast } from 'sonner';
 import StatusBadge from '../components/StatusBadge';
 import {
@@ -27,6 +27,7 @@ const STATUS_OPTIONS = [
 ];
 
 export default function TopicDetail() {
+  const supabase = useSupabase();
   const { id } = useParams();
   const navigate = useNavigate();
 

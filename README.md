@@ -86,6 +86,7 @@ Run **all** migration files in order. Each one adds tables the CMS needs:
 | `005_seo_workflow.sql` | SEO workflow tracking |
 | `006_flexible_page_types.sql` | Custom page type support |
 | `007_pipeline_stages.sql` | Two-gate content pipeline stages |
+| `008_feedback_loop.sql` | Feedback system + vector embeddings |
 
 All files are in `supabase/migrations/`. Run them in numbered order -- each should return "Success. No rows returned."
 
@@ -123,6 +124,29 @@ npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173) and sign in with the user you created in step 5.
+
+### 8. Deploy the feedback Edge Function (optional)
+
+The feedback system captures your edits to learn your writing style over time. The Edge Function generates vector embeddings automatically.
+
+```bash
+# Install the Supabase CLI if you haven't
+npm install -g supabase
+
+# Link to your project
+supabase link --project-ref YOUR_PROJECT_REF
+
+# Deploy the function
+supabase functions deploy generate-feedback-embedding
+
+# Create a database webhook to trigger the function
+# In Supabase Dashboard → Database → Webhooks → Create new
+# Table: feedback
+# Events: INSERT
+# Function: generate-feedback-embedding
+```
+
+**Note:** The CMS works without this step. Feedback entries will be stored but won't have embeddings until the function is deployed. You can deploy it at any time.
 
 ## How to Use with Claude Code
 

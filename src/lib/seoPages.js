@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { getClient } from './supabase';
 
 /**
  * Fetch SEO pages with optional filters.
@@ -7,6 +7,7 @@ import { supabase } from './supabase';
  * @param {boolean} ascending - Sort direction (default: false = newest first)
  */
 export async function fetchSeoPages({ status, page_type, search } = {}, orderBy = 'created_at', ascending = false) {
+  const supabase = getClient();
   let query = supabase
     .from('seo_pages')
     .select('id, slug, page_type, title, h1, meta_description, keywords, status, scheduled_date, created_at, updated_at')
@@ -25,6 +26,7 @@ export async function fetchSeoPages({ status, page_type, search } = {}, orderBy 
  * Fetch a single SEO page by ID (full record including content and data).
  */
 export async function fetchSeoPageById(id) {
+  const supabase = getClient();
   const { data, error } = await supabase
     .from('seo_pages')
     .select('*')
@@ -39,6 +41,7 @@ export async function fetchSeoPageById(id) {
  * Update an SEO page. Accepts partial updates.
  */
 export async function updateSeoPage(id, updates) {
+  const supabase = getClient();
   const { data, error } = await supabase
     .from('seo_pages')
     .update(updates)
@@ -54,6 +57,7 @@ export async function updateSeoPage(id, updates) {
  * Delete an SEO page.
  */
 export async function deleteSeoPage(id) {
+  const supabase = getClient();
   const { error } = await supabase
     .from('seo_pages')
     .delete()
@@ -86,6 +90,7 @@ export async function approveSeoPage(id, scheduledDate = null) {
  * @param {string[]} ids - Array of page IDs to approve
  */
 export async function batchApproveSeoPages(ids) {
+  const supabase = getClient();
   const { data, error } = await supabase
     .from('seo_pages')
     .update({ status: 'published' })
@@ -107,6 +112,7 @@ export async function batchApproveSeoPages(ids) {
  * Fetch pages for the approval queue: needs-review pages, ordered by scheduled_date.
  */
 export async function fetchApprovalQueue() {
+  const supabase = getClient();
   const { data, error } = await supabase
     .from('seo_pages')
     .select('id, slug, page_type, title, h1, meta_description, keywords, status, scheduled_date, content, created_at')
@@ -122,6 +128,7 @@ export async function fetchApprovalQueue() {
  * Returns unified items with a `content_type` field ('blog' or 'seo').
  */
 export async function fetchCalendarItems(year, month) {
+  const supabase = getClient();
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
   const endMonth = month === 12 ? 1 : month + 1;
   const endYear = month === 12 ? year + 1 : year;
@@ -176,6 +183,7 @@ export async function fetchCalendarItems(year, month) {
  * Fetch editorial research entries, optionally filtered.
  */
 export async function fetchEditorialResearch({ unused_only = false, source_type } = {}) {
+  const supabase = getClient();
   let query = supabase
     .from('editorial_research')
     .select('*')

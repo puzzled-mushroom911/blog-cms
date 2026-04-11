@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../lib/supabase';
+import { useSupabase } from '../hooks/useSupabase';
 import {
   Lightbulb,
   ThumbsUp,
@@ -32,6 +32,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function Topics() {
+  const supabase = useSupabase();
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
