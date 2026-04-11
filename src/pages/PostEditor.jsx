@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useSupabase } from '../hooks/useSupabase';
 import { toast } from 'sonner';
 import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 
 export default function PostEditor() {
+  const supabase = useSupabase();
   const { id } = useParams();
   const navigate = useNavigate();
 
