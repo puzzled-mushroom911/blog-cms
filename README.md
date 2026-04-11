@@ -1,8 +1,36 @@
 # Blog CMS
 
+<p align="center">
+  <img src="https://moonify.ai/moonify-logo.svg" alt="Moonify" height="40">
+  <br>
+  <em>Built by the <a href="https://moonify.ai">Moonify.ai</a> team</em>
+</p>
+
 A lightweight content management system for reviewing and publishing AI-generated blog posts. Built for content creators who use Claude Code (or any AI) to turn YouTube transcripts into SEO-optimized blog posts.
 
 **Stack:** React 19 + Vite + Tailwind CSS 4 + Supabase (all free tier)
+
+## How It All Fits Together
+
+This project has **two parts** that share one Supabase database:
+
+```
+┌─────────────────────┐         ┌─────────────────────┐
+│     Blog CMS        │         │   Public Website     │
+│   (this repo)       │         │  (you build this)    │
+│                     │         │                      │
+│  Write, review,     │         │  Readers see your    │
+│  and publish posts  │────────▶│  published content   │
+│                     │  same   │                      │
+│  Admin interface    │Supabase │  Built with the      │
+│  (login required)   │   DB    │  prompt in /prompts  │
+└─────────────────────┘         └─────────────────────┘
+```
+
+1. **This repo (Blog CMS)** -- The admin tool. You log in, review AI-generated posts, edit metadata, and hit publish.
+2. **Your public website** -- The reader-facing site. Use the prompt in `prompts/build-public-website.md` with Claude Co-Work or Claude Code to build it. It reads published posts from the same Supabase database using the anon key (no login needed).
+
+Both projects use the same Supabase project. The CMS writes to the database (authenticated). The public site reads from it (anon key, RLS restricts to published posts only).
 
 ## What This Does
 
@@ -41,12 +69,25 @@ npm install
 3. Give it a name (e.g., "blog-cms") and set a database password
 4. Wait for it to finish setting up (~1 minute)
 
-### 4. Run the database migration
+### 4. Run the database migrations
+
+Run **all** migration files in order. Each one adds tables the CMS needs:
 
 1. In your Supabase dashboard, go to **SQL Editor**
 2. Click **New query**
-3. Copy the contents of `supabase/migrations/001_blog_posts.sql` and paste it in
-4. Click **Run** (you should see "Success. No rows returned")
+3. Copy and paste the contents of each file below, one at a time, and click **Run**:
+
+| File | What it creates |
+|------|----------------|
+| `001_blog_posts.sql` | Blog posts table + RLS policies |
+| `002_blog_topics.sql` | Content pipeline / topic research |
+| `003_editor_notes.sql` | Inline editorial comments |
+| `004_seo_pages.sql` | Programmatic SEO pages |
+| `005_seo_workflow.sql` | SEO workflow tracking |
+| `006_flexible_page_types.sql` | Custom page type support |
+| `007_pipeline_stages.sql` | Two-gate content pipeline stages |
+
+All files are in `supabase/migrations/`. Run them in numbered order -- each should return "Success. No rows returned."
 
 ### 5. Create your CMS user
 
@@ -198,11 +239,18 @@ blog-cms/
 ├── index.html                   # HTML entry point
 ├── supabase/
 │   └── migrations/
-│       └── 001_blog_posts.sql   # Database schema
+│       ├── 001_blog_posts.sql   # Blog posts table
+│       ├── 002_blog_topics.sql  # Topic research pipeline
+│       ├── 003_editor_notes.sql # Inline editorial comments
+│       ├── 004_seo_pages.sql    # Programmatic SEO pages
+│       ├── 005_seo_workflow.sql # SEO workflow tracking
+│       ├── 006_flexible_page_types.sql  # Custom page types
+│       └── 007_pipeline_stages.sql      # Pipeline stage config
 ├── prompts/
 │   ├── generate-blog-post.md    # Prompt: transcript to blog post
 │   ├── seo-review.md            # Prompt: SEO audit before publishing
-│   └── setup-knowledge-base.md  # Guide: set up your voice/style KB
+│   ├── setup-knowledge-base.md  # Guide: set up your voice/style KB
+│   └── build-public-website.md  # Prompt: build the public-facing site
 └── src/
     ├── main.jsx                 # Entry point
     ├── App.jsx                  # Routes
@@ -226,11 +274,17 @@ blog-cms/
         └── StatusBadge.jsx      # Status label component
 ```
 
-## Connecting to Your Website
+## Building Your Public Website
 
-The CMS stores content in Supabase. Your website reads from the same database to display published posts.
+The CMS stores content in Supabase. You need a separate public-facing website that reads from the same database to display published posts.
 
-**Fetching published posts (example):**
+**Option 1: Use the Claude Co-Work prompt (recommended)**
+
+Open `prompts/build-public-website.md` and paste it into a new Claude Co-Work session (or Claude Code). It builds a complete blog website -- home page, blog index, post pages, contact page -- that connects to your Supabase database using the anon key.
+
+**Option 2: Build your own**
+
+Your public site just needs to query Supabase with the anon key:
 
 ```js
 import { createClient } from '@supabase/supabase-js'
