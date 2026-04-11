@@ -1,20 +1,89 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getConfig, saveConfig } from '../config';
 import { toast } from 'sonner';
-import { Save, RotateCcw, Database, Unplug } from 'lucide-react';
+import { Save, RotateCcw, Database, Unplug, Trash2, Plus, BookOpen, Power, PowerOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useConnection } from '../contexts/ConnectionContext';
 import { useNavigate } from 'react-router-dom';
 import { getStoredConnection } from '../lib/supabase';
+import { useSupabase } from '../hooks/useSupabase';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 export default function Settings() {
   const [values, setValues] = useState(getConfig);
   const { disconnect } = useConnection();
   const navigate = useNavigate();
   const connection = getStoredConnection();
+
+  const supabase = useSupabase();
+  const [preferences, setPreferences] = useState([]);
+  const [loadingPrefs, setLoadingPrefs] = useState(true);
+  const [newRule, setNewRule] = useState('');
+  const [newCategory, setNewCategory] = useState('tone');
+  const [addingRule, setAddingRule] = useState(false);
+
+  useEffect(() => {
+    loadPreferences();
+  }, []);
+
+  async function loadPreferences() {
+    setLoadingPrefs(true);
+    const { data } = await supabase
+      .from('preferences')
+      .select('*')
+      .order('created_at', { ascending: true });
+    setPreferences(data || []);
+    setLoadingPrefs(false);
+  }
+
+  async function handleAddRule() {
+    const trimmed = newRule.trim();
+    if (!trimmed) return;
+    setAddingRule(true);
+    const { data, error } = await supabase
+      .from('preferences')
+      .insert({ rule: trimmed, category: newCategory })
+      .select()
+      .single();
+    setAddingRule(false);
+    if (error) {
+      toast.error('Failed to add rule: ' + error.message);
+    } else {
+      setPreferences((prev) => [...prev, data]);
+      setNewRule('');
+      toast.success('Rule added');
+    }
+  }
+
+  async function handleToggleRule(id, currentActive) {
+    const { error } = await supabase
+      .from('preferences')
+      .update({ active: !currentActive })
+      .eq('id', id);
+    if (error) {
+      toast.error('Failed to update rule');
+    } else {
+      setPreferences((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, active: !currentActive } : p))
+      );
+    }
+  }
+
+  async function handleDeleteRule(id) {
+    const { error } = await supabase
+      .from('preferences')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      toast.error('Failed to delete rule');
+    } else {
+      setPreferences((prev) => prev.filter((p) => p.id !== id));
+      toast.success('Rule deleted');
+    }
+  }
 
   function handleChange(field, value) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -65,6 +134,111 @@ export default function Settings() {
           <Unplug className="w-3.5 h-3.5" />
           Disconnect
         </Button>
+      </div>
+
+      {/* Content Preferences */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <BookOpen className="w-5 h-5 text-violet-600" />
+          <div>
+            <h2 className="font-semibold text-slate-900 text-sm">Content Preferences</h2>
+            <p className="text-xs text-slate-500">Style rules for AI-generated content. Loaded into every generation prompt.</p>
+          </div>
+        </div>
+
+        {loadingPrefs ? (
+          <div className="flex items-center gap-2 text-sm text-slate-400 py-4 justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading preferences...
+          </div>
+        ) : (
+          <>
+            {/* Existing rules */}
+            {preferences.length > 0 ? (
+              <div className="space-y-2 mb-4">
+                {preferences.map((pref) => (
+                  <div
+                    key={pref.id}
+                    className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
+                      pref.active
+                        ? 'bg-white border-slate-200'
+                        : 'bg-slate-50 border-slate-100 opacity-60'
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm ${pref.active ? 'text-slate-700' : 'text-slate-400 line-through'}`}>
+                        {pref.rule}
+                      </p>
+                      <Badge variant="secondary" className="mt-1.5 text-[10px]">
+                        {pref.category}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleToggleRule(pref.id, pref.active)}
+                        title={pref.active ? 'Disable rule' : 'Enable rule'}
+                      >
+                        {pref.active ? (
+                          <Power className="w-3.5 h-3.5 text-emerald-500" />
+                        ) : (
+                          <PowerOff className="w-3.5 h-3.5 text-slate-400" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                        onClick={() => handleDeleteRule(pref.id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 mb-4">
+                No rules yet. Add rules like &quot;Never use the word vibrant&quot; or &quot;Lead with data, not adjectives.&quot;
+              </p>
+            )}
+
+            {/* Add new rule */}
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <Input
+                  type="text"
+                  value={newRule}
+                  onChange={(e) => setNewRule(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newRule.trim()) handleAddRule();
+                  }}
+                  placeholder="e.g. Never use the word vibrant"
+                />
+              </div>
+              <select
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                className="h-9 px-2 text-xs border border-slate-200 rounded-md bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              >
+                <option value="tone">Tone</option>
+                <option value="structure">Structure</option>
+                <option value="vocabulary">Vocabulary</option>
+                <option value="formatting">Formatting</option>
+              </select>
+              <Button
+                size="sm"
+                onClick={handleAddRule}
+                disabled={!newRule.trim() || addingRule}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add
+              </Button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
