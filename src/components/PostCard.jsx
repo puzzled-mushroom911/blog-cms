@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, Pencil, ExternalLink } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import StatusBadge from './StatusBadge';
 import { getConfig } from '../config';
 
@@ -51,8 +52,8 @@ export default function PostCard({ post }) {
   const config = getConfig();
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
-      <div className="flex items-start gap-4 p-4">
+    <Card className="hover:border-slate-300 hover:shadow-sm transition-all py-0">
+      <CardContent className="p-4 flex items-start gap-4">
         {/* Thumbnail */}
         {post.image && (
           <img
@@ -103,7 +104,7 @@ export default function PostCard({ post }) {
             <ExternalLink className="w-4 h-4" />
           </a>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

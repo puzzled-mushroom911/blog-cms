@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import StatusBadge from './StatusBadge';
 import { getConfig } from '../config';
 import { Globe, Calendar, ArrowRight } from 'lucide-react';
@@ -12,9 +13,11 @@ export default function SeoPageCard({ page }) {
   return (
     <Link
       to={`/seo-pages/${page.id}`}
-      className="block bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:shadow-sm transition-all group"
+      className="block group"
     >
-      <div className="flex items-start justify-between gap-3">
+      <Card className="hover:border-slate-300 hover:shadow-sm transition-all py-0">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeColor}`}>
@@ -42,7 +45,9 @@ export default function SeoPageCard({ page }) {
           </div>
         </div>
         <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors flex-shrink-0 mt-1" />
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchApprovalQueue, batchApproveSeoPages, updateSeoPage } from '../lib/seoPages';
+import { toast } from 'sonner';
 import StatusBadge from '../components/StatusBadge';
 import { CheckCircle, XCircle, Clock, Loader2, Inbox, ChevronDown, ChevronRight } from 'lucide-react';
 
@@ -101,11 +102,14 @@ export default function ApprovalQueue() {
     if (selected.size === 0) return;
     setApproving(true);
     try {
+      const count = selected.size;
       await batchApproveSeoPages([...selected]);
       setSelected(new Set());
       await loadQueue();
+      toast.success(`Approved ${count} page(s)`);
     } catch (err) {
       console.error(err);
+      toast.error('Approval failed');
     } finally {
       setApproving(false);
     }
@@ -115,8 +119,10 @@ export default function ApprovalQueue() {
     try {
       await updateSeoPage(id, { status: 'draft' });
       await loadQueue();
+      toast.success('Page rejected');
     } catch (err) {
       console.error(err);
+      toast.error('Rejection failed');
     }
   }
 

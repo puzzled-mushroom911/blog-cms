@@ -9,6 +9,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageSquare, Send, Check, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
 
 export default function BlockNotes({
   blockIndex,
@@ -171,13 +172,13 @@ export default function BlockNotes({
               onSubmit={handleSubmit}
               className="flex items-center gap-1.5 px-3 py-2 border-t border-slate-100 bg-slate-50"
             >
-              <input
+              <Input
                 ref={inputRef}
                 type="text"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="Add a note..."
-                className="flex-1 text-xs px-2 py-1.5 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 bg-white"
+                className="flex-1 text-xs h-7"
               />
               <button
                 type="submit"

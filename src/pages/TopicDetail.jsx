@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 import StatusBadge from '../components/StatusBadge';
 import {
   ArrowLeft,
@@ -12,6 +13,10 @@ import {
   BarChart3,
   ExternalLink,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const STATUS_OPTIONS = [
   { value: 'researched', label: 'Researched' },
@@ -28,7 +33,6 @@ export default function TopicDetail() {
   const [topic, setTopic] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
 
   useEffect(() => {
     loadTopic();
@@ -53,7 +57,6 @@ export default function TopicDetail() {
   async function handleSave() {
     if (!topic) return;
     setSaving(true);
-    setSaveMessage('');
 
     const { error } = await supabase
       .from('blog_topics')
@@ -65,10 +68,9 @@ export default function TopicDetail() {
 
     setSaving(false);
     if (error) {
-      setSaveMessage('Error saving: ' + error.message);
+      toast.error('Failed to save: ' + error.message);
     } else {
-      setSaveMessage('Saved');
-      setTimeout(() => setSaveMessage(''), 3000);
+      toast.success('Topic saved');
     }
   }
 
@@ -91,12 +93,13 @@ export default function TopicDetail() {
         {/* Top bar */}
         <div className="h-14 flex items-center justify-between px-6 border-b border-slate-200 bg-white flex-shrink-0">
           <div className="flex items-center gap-4">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigate('/topics')}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
-            </button>
+            </Button>
             <div className="flex items-center gap-3 min-w-0">
               <StatusBadge status={topic.status} />
               <h1 className="text-sm font-semibold text-slate-800 truncate max-w-md">
@@ -106,23 +109,13 @@ export default function TopicDetail() {
           </div>
 
           <div className="flex items-center gap-3">
-            {saveMessage && (
-              <span
-                className={`text-xs font-medium ${
-                  saveMessage.startsWith('Error') ? 'text-red-600' : 'text-emerald-600'
-                }`}
-              >
-                {saveMessage}
-              </span>
-            )}
-            <button
+            <Button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
             >
               <Save className="w-4 h-4" />
               {saving ? 'Saving...' : 'Save'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -318,40 +311,41 @@ export default function TopicDetail() {
         <div className="p-6 space-y-6">
           {/* Status */}
           <div>
-            <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+            <Label className="text-xs text-slate-500 uppercase tracking-wider mb-2">
               Status
-            </label>
-            <select
-              value={topic.status}
-              onChange={(e) => setTopic({ ...topic, status: e.target.value })}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
-            >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            </Label>
+            <Select value={topic.status} onValueChange={(val) => setTopic({ ...topic, status: val })}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+            <Label className="text-xs text-slate-500 uppercase tracking-wider mb-2">
               Reviewer Notes
-            </label>
-            <textarea
+            </Label>
+            <Textarea
               value={topic.notes || ''}
               onChange={(e) => setTopic({ ...topic, notes: e.target.value })}
               rows={6}
               placeholder="Add notes about this topic..."
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-y focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+              className="resize-y"
             />
           </div>
 
           {/* Linked blog post */}
           {topic.blog_post_id && (
             <div>
-              <label className="block text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+              <Label className="text-xs text-slate-500 uppercase tracking-wider mb-2">
                 Blog Post
-              </label>
+              </Label>
               <Link
                 to={`/posts/${topic.blog_post_id}`}
                 className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors"
@@ -369,14 +363,14 @@ export default function TopicDetail() {
           </div>
 
           {/* Save button */}
-          <button
+          <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 disabled:opacity-50 transition-colors"
+            className="w-full"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Changes'}
-          </button>
+          </Button>
         </div>
       </aside>
     </div>

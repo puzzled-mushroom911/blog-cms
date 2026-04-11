@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Loader2, Camera } from 'lucide-react';
+import { Search, Loader2, Camera } from 'lucide-react';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function PexelsSearch({ apiKey, onSelect, onClose }) {
   const [query, setQuery] = useState('');
@@ -14,14 +17,6 @@ export default function PexelsSearch({ apiKey, onSelect, onClose }) {
     inputRef.current?.focus();
   }, []);
 
-  // Close on Escape
-  useEffect(() => {
-    function handleKey(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [onClose]);
 
   async function search(pageNum = 1) {
     if (!query.trim()) return;
@@ -65,24 +60,15 @@ export default function PexelsSearch({ apiKey, onSelect, onClose }) {
   const hasPrev = page > 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden p-0">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <div className="flex items-center gap-2">
+        <DialogHeader className="px-5 pt-5 pb-0">
+          <DialogTitle className="flex items-center gap-2">
             <Camera className="w-4 h-4 text-slate-400" />
-            <h2 className="text-sm font-semibold text-slate-800">Search Pexels</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+            Search Pexels
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Search bar */}
         <form onSubmit={handleSubmit} className="px-5 py-3 border-b border-slate-100">
@@ -181,7 +167,7 @@ export default function PexelsSearch({ apiKey, onSelect, onClose }) {
             </a>
           </span>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchCalendarItems } from '../lib/seoPages';
 import CalendarGrid from '../components/CalendarGrid';
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -78,23 +79,23 @@ export default function Calendar() {
               <span className="w-2 h-2 rounded-full bg-amber-400" /> Review
             </span>
           </div>
-          <button onClick={goToday} className="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50">
+          <Button variant="outline" size="sm" onClick={goToday}>
             Today
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Month navigation */}
       <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-slate-100">
+        <Button variant="ghost" size="icon" onClick={prevMonth}>
           <ChevronLeft className="w-5 h-5 text-slate-600" />
-        </button>
+        </Button>
         <h2 className="text-lg font-semibold text-slate-900">
           {MONTH_NAMES[month - 1]} {year}
         </h2>
-        <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-slate-100">
+        <Button variant="ghost" size="icon" onClick={nextMonth}>
           <ChevronRight className="w-5 h-5 text-slate-600" />
-        </button>
+        </Button>
       </div>
 
       {/* Grid */}

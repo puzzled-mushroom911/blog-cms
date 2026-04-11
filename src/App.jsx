@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { Toaster } from "@/components/ui/sonner";
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -25,26 +26,29 @@ export default function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="posts/:id" element={<PostEditor />} />
-        <Route path="topics" element={<Topics />} />
-        <Route path="topics/:id" element={<TopicDetail />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="seo-pages" element={<SeoPages />} />
-        <Route path="seo-pages/:id" element={<SeoPageEditor />} />
-        <Route path="approval" element={<ApprovalQueue />} />
-        <Route path="calendar" element={<Calendar />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="posts/:id" element={<PostEditor />} />
+          <Route path="topics" element={<Topics />} />
+          <Route path="topics/:id" element={<TopicDetail />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="seo-pages" element={<SeoPages />} />
+          <Route path="seo-pages/:id" element={<SeoPageEditor />} />
+          <Route path="approval" element={<ApprovalQueue />} />
+          <Route path="calendar" element={<Calendar />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <Toaster richColors position="bottom-right" />
+    </>
   );
 }

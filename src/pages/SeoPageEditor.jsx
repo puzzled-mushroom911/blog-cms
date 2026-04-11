@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchSeoPageById, updateSeoPage, deleteSeoPage, approveSeoPage } from '../lib/seoPages';
+import { toast } from 'sonner';
 import ContentRenderer from '../components/ContentRenderer';
 import StatusBadge from '../components/StatusBadge';
 import { getConfig } from '../config';
@@ -8,6 +9,15 @@ import {
   ArrowLeft, Save, Trash2, CheckCircle, Loader2, Globe,
   Calendar, Eye, PanelRight, PanelRightClose,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 
 const STATUS_OPTIONS = ['draft', 'needs-review', 'published'];
 
@@ -67,9 +77,9 @@ export default function SeoPageEditor() {
     try {
       const { id: _, created_at, updated_at, ...updates } = page;
       await updateSeoPage(id, updates);
-      setError(null);
+      toast.success('Page saved');
     } catch (err) {
-      setError(err.message);
+      toast.error('Failed to save: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -80,8 +90,9 @@ export default function SeoPageEditor() {
     try {
       const updated = await approveSeoPage(id, page.scheduled_date);
       setPage(updated);
+      toast.success('Page approved');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setSaving(false);
     }
@@ -90,9 +101,10 @@ export default function SeoPageEditor() {
   async function handleDelete() {
     try {
       await deleteSeoPage(id);
+      toast.success('Page deleted');
       navigate('/seo-pages');
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     }
   }
 
@@ -119,43 +131,45 @@ export default function SeoPageEditor() {
       {/* Top bar */}
       <div className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/seo-pages')} className="text-slate-400 hover:text-slate-600">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/seo-pages')}>
             <ArrowLeft className="w-4 h-4" />
-          </button>
+          </Button>
           <StatusBadge status={page.status} />
           <span className="text-sm text-slate-500 truncate max-w-xs">{page.title}</span>
         </div>
         <div className="flex items-center gap-2">
           {page.status === 'needs-review' && (
-            <button
+            <Button
               onClick={handleApprove}
               disabled={saving}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               <CheckCircle className="w-3.5 h-3.5" />
               Approve
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             Save
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setShowDeleteConfirm(true)}
-            className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50"
+            className="text-slate-400 hover:text-red-500 hover:bg-red-50"
           >
             <Trash2 className="w-4 h-4" />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setShowSidebar(!showSidebar)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
           >
             {showSidebar ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -204,106 +218,104 @@ export default function SeoPageEditor() {
             <h2 className="font-semibold text-sm text-slate-900">Page Settings</h2>
 
             {/* Status */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">Status</span>
-              <select
-                value={page.status}
-                onChange={e => updateField('status', e.target.value)}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-              >
-                {STATUS_OPTIONS.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </label>
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">Status</Label>
+              <Select value={page.status} onValueChange={(val) => updateField('status', val)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map(s => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Page Type */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">Page Type</span>
-              <select
-                value={page.page_type}
-                onChange={e => updateField('page_type', e.target.value)}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-              >
-                {pageTypes.map(t => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </label>
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">Page Type</Label>
+              <Select value={page.page_type} onValueChange={(val) => updateField('page_type', val)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageTypes.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Title */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">Title</span>
-              <input
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">Title</Label>
+              <Input
                 type="text"
                 value={page.title}
                 onChange={e => updateField('title', e.target.value)}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
               />
               <span className="text-xs text-slate-400 mt-0.5 block">{page.title.length}/60</span>
-            </label>
+            </div>
 
             {/* Slug */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">Slug</span>
-              <input
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">Slug</Label>
+              <Input
                 type="text"
                 value={page.slug}
                 onChange={e => updateField('slug', e.target.value)}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono"
+                className="font-mono"
               />
-            </label>
+            </div>
 
             {/* H1 */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">H1</span>
-              <input
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">H1</Label>
+              <Input
                 type="text"
                 value={page.h1}
                 onChange={e => updateField('h1', e.target.value)}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
               />
-            </label>
+            </div>
 
             {/* Scheduled Date */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">Scheduled Date</span>
-              <input
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">Scheduled Date</Label>
+              <Input
                 type="date"
                 value={page.scheduled_date || ''}
                 onChange={e => updateField('scheduled_date', e.target.value || null)}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
               />
-            </label>
+            </div>
 
             <hr className="border-slate-100" />
             <h2 className="font-semibold text-sm text-slate-900">SEO</h2>
 
             {/* Meta Description */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">Meta Description</span>
-              <textarea
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">Meta Description</Label>
+              <Textarea
                 value={page.meta_description}
                 onChange={e => updateField('meta_description', e.target.value)}
                 rows={3}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"
+                className="resize-none"
               />
               <span className={`text-xs mt-0.5 block ${page.meta_description.length > 160 ? 'text-red-500' : 'text-slate-400'}`}>
                 {page.meta_description.length}/160
               </span>
-            </label>
+            </div>
 
             {/* Keywords */}
-            <label className="block">
-              <span className="text-xs font-medium text-slate-500">Keywords</span>
-              <input
+            <div>
+              <Label className="text-xs text-slate-500 mb-1">Keywords</Label>
+              <Input
                 type="text"
                 value={page.keywords || ''}
                 onChange={e => updateField('keywords', e.target.value)}
-                className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
                 placeholder="comma, separated, keywords"
               />
-            </label>
+            </div>
 
             {/* Preview link */}
             <div className="pt-2">
@@ -322,28 +334,18 @@ export default function SeoPageEditor() {
       </div>
 
       {/* Delete confirmation modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm mx-4">
-            <h3 className="font-semibold text-slate-900">Delete this page?</h3>
-            <p className="text-sm text-slate-500 mt-1">This action cannot be undone.</p>
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this page?</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

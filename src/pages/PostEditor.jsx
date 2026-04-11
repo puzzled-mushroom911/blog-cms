@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
 import StatusBadge from '../components/StatusBadge';
 import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
 
 export default function PostEditor() {
   const { id } = useParams();
@@ -13,7 +19,6 @@ export default function PostEditor() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -86,7 +91,6 @@ export default function PostEditor() {
   async function handlePublish() {
     if (!post) return;
     setSaving(true);
-    setSaveMessage('');
 
     const { error } = await supabase
       .from('blog_posts')
@@ -111,20 +115,18 @@ export default function PostEditor() {
 
     setSaving(false);
     if (error) {
-      setSaveMessage('Error publishing: ' + error.message);
+      toast.error('Failed to publish: ' + error.message);
     } else {
       setPost(prev => ({ ...prev, status: 'published' }));
       triggerDeploy();
       revalidateBlog(post.slug);
-      setSaveMessage('Published & deploy triggered');
-      setTimeout(() => setSaveMessage(''), 3000);
+      toast.success('Published & deploy triggered');
     }
   }
 
   async function handleSave() {
     if (!post) return;
     setSaving(true);
-    setSaveMessage('');
 
     const { error } = await supabase
       .from('blog_posts')
@@ -149,16 +151,15 @@ export default function PostEditor() {
 
     setSaving(false);
     if (error) {
-      setSaveMessage('Error saving: ' + error.message);
+      toast.error('Failed to save: ' + error.message);
     } else {
       // Trigger site rebuild when a post is published
       if (post.status === 'published') {
         triggerDeploy();
-        setSaveMessage('Saved & deploy triggered');
+        toast.success('Saved & deploy triggered');
       } else {
-        setSaveMessage('Saved');
+        toast.success('Post saved');
       }
-      setTimeout(() => setSaveMessage(''), 3000);
       revalidateBlog(post.slug);
     }
   }
@@ -217,9 +218,10 @@ export default function PostEditor() {
       .eq('id', post.id);
     setDeleting(false);
     if (!error) {
+      toast.success('Post deleted');
       navigate('/');
     } else {
-      setSaveMessage('Error deleting: ' + error.message);
+      toast.error('Failed to delete: ' + error.message);
       setShowDeleteConfirm(false);
     }
   }
@@ -256,45 +258,26 @@ export default function PostEditor() {
           </div>
 
           <div className="flex items-center gap-3">
-            {saveMessage && (
-              <span
-                className={`text-xs font-medium ${
-                  saveMessage.startsWith('Error') ? 'text-red-600' : 'text-emerald-600'
-                }`}
-              >
-                {saveMessage}
-              </span>
-            )}
             {/* Delete button */}
-            <div className="relative">
-              <button
-                onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
-                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                title="Delete post"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-              {showDeleteConfirm && (
-                <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-50 w-64">
-                  <p className="text-sm text-slate-700 mb-3">Delete this post permanently?</p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleDelete}
-                      disabled={deleting}
-                      className="flex-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 disabled:opacity-50"
-                    >
-                      {deleting ? 'Deleting...' : 'Delete'}
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 px-3 py-1.5 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-600 hover:bg-red-50">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete this post?</DialogTitle>
+                  <DialogDescription>This action cannot be undone.</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                  <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                    {deleting ? "Deleting..." : "Delete"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             {post.status !== 'published' && (
               <button
                 onClick={handlePublish}

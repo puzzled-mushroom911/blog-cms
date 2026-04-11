@@ -3,6 +3,10 @@ import { Save, ExternalLink, Camera } from 'lucide-react';
 import { getConfig } from '../config';
 import ImageUpload from './ImageUpload';
 import PexelsSearch from './PexelsSearch';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
@@ -46,32 +50,32 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {/* Status */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Status
-          </label>
-          <select
-            value={post.status || 'draft'}
-            onChange={(e) => handleChange('status', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 bg-white"
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+          </Label>
+          <Select value={post.status || 'draft'} onValueChange={(val) => handleChange('status', val)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Title */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Title
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={post.title || ''}
             onChange={(e) => handleChange('title', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
           <p className="text-xs text-slate-400 mt-1">
             {(post.title || '').length}/60 characters
@@ -80,100 +84,97 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
 
         {/* Slug */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Slug
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={post.slug || ''}
             onChange={(e) => handleChange('slug', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+            className="font-mono text-xs"
           />
         </div>
 
         {/* Excerpt */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Excerpt
-          </label>
-          <textarea
+          </Label>
+          <Textarea
             value={post.excerpt || ''}
             onChange={(e) => handleChange('excerpt', e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 resize-none"
+            className="resize-none"
           />
         </div>
 
         {/* Category */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Category
-          </label>
-          <select
-            value={post.category || ''}
-            onChange={(e) => handleChange('category', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 bg-white"
-          >
-            <option value="">Select category</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+          </Label>
+          <Select value={post.category || 'none'} onValueChange={(val) => handleChange('category', val === 'none' ? '' : val)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Select category</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Tags */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
-            Tags <span className="text-slate-400">(comma-separated)</span>
-          </label>
-          <input
+          <Label className="text-xs text-slate-500 mb-1.5">
+            Tags <span className="text-slate-400 font-normal">(comma-separated)</span>
+          </Label>
+          <Input
             type="text"
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
             onBlur={handleTagsBlur}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
         </div>
 
         {/* Author */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Author
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={post.author || ''}
             onChange={(e) => handleChange('author', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
         </div>
 
         {/* Date */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Date
-          </label>
-          <input
+          </Label>
+          <Input
             type="date"
             value={post.date || ''}
             onChange={(e) => handleChange('date', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
         </div>
 
         {/* Read time */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Read Time
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={post.read_time || ''}
             onChange={(e) => handleChange('read_time', e.target.value)}
             placeholder="8 min read"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
         </div>
 
@@ -186,14 +187,14 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
 
         {/* Meta description */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Meta Description
-          </label>
-          <textarea
+          </Label>
+          <Textarea
             value={post.meta_description || ''}
             onChange={(e) => handleChange('meta_description', e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 resize-none"
+            className="resize-none"
           />
           <p className="text-xs text-slate-400 mt-1">
             {(post.meta_description || '').length}/160 characters
@@ -202,14 +203,13 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
 
         {/* Keywords */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Keywords
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={post.keywords || ''}
             onChange={(e) => handleChange('keywords', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
         </div>
 
@@ -244,29 +244,28 @@ export default function MetadataSidebar({ post, onChange, onSave, saving }) {
 
         {/* Manual image URL fallback */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             Image URL <span className="text-slate-400 font-normal">(or paste)</span>
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={post.image || ''}
             onChange={(e) => handleChange('image', e.target.value)}
             placeholder="https://..."
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
           />
         </div>
 
         {/* YouTube ID */}
         <div>
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">
+          <Label className="text-xs text-slate-500 mb-1.5">
             YouTube Video ID
-          </label>
-          <input
+          </Label>
+          <Input
             type="text"
             value={post.youtube_id || ''}
             onChange={(e) => handleChange('youtube_id', e.target.value)}
             placeholder="e.g. dQw4w9WgXcQ"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
+            className="font-mono"
           />
         </div>
       </div>

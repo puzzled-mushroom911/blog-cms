@@ -1,26 +1,28 @@
 import { useState } from 'react';
 import { getConfig, saveConfig } from '../config';
-import { Save, Check, RotateCcw } from 'lucide-react';
+import { toast } from 'sonner';
+import { Save, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 export default function Settings() {
   const [values, setValues] = useState(getConfig);
-  const [saved, setSaved] = useState(false);
 
   function handleChange(field, value) {
     setValues((prev) => ({ ...prev, [field]: value }));
-    setSaved(false);
   }
 
   function handleSave() {
     saveConfig(values);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    toast.success('Settings saved');
   }
 
   function handleReset() {
     localStorage.removeItem('blog-cms-config');
     setValues(getConfig());
-    setSaved(false);
+    toast.success('Settings reset to defaults');
   }
 
   return (
@@ -78,13 +80,13 @@ export default function Settings() {
 
         {/* Categories */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <Label className="text-sm text-slate-700 mb-1">
             Blog Categories
-          </label>
+          </Label>
           <p className="text-xs text-slate-400 mb-1.5">
             Comma-separated list of categories for blog posts
           </p>
-          <input
+          <Input
             type="text"
             value={(values.categories || []).join(', ')}
             onChange={(e) =>
@@ -94,19 +96,18 @@ export default function Settings() {
               )
             }
             placeholder="General, How-To, Guide, Review"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-colors"
           />
         </div>
 
         {/* SEO Page Types */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <Label className="text-sm text-slate-700 mb-1">
             SEO Page Types
-          </label>
+          </Label>
           <p className="text-xs text-slate-400 mb-1.5">
             One per line, format: <code className="bg-slate-100 px-1 rounded">slug: Display Name</code>
           </p>
-          <textarea
+          <Textarea
             value={(values.pageTypes || []).map((t) => `${t.value}: ${t.label}`).join('\n')}
             onChange={(e) => {
               const colors = [
@@ -134,7 +135,7 @@ export default function Settings() {
             }}
             rows={5}
             placeholder={"landing: Landing Page\ncomparison: Comparison\nguide: Guide"}
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-colors resize-none"
+            className="font-mono resize-none"
           />
         </div>
 
@@ -156,9 +157,9 @@ export default function Settings() {
 
         {/* Pexels API Key */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <Label className="text-sm text-slate-700 mb-1">
             Pexels API Key
-          </label>
+          </Label>
           <p className="text-xs text-slate-400 mb-1.5">
             Enables stock image search in the post editor.{' '}
             <a
@@ -170,40 +171,24 @@ export default function Settings() {
               Get a free key
             </a>
           </p>
-          <input
+          <Input
             type="password"
             value={values.pexelsApiKey || ''}
             onChange={(e) => handleChange('pexelsApiKey', e.target.value)}
             placeholder="Enter your Pexels API key"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-colors"
           />
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-          <button
-            onClick={handleSave}
-            className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors"
-          >
-            {saved ? (
-              <>
-                <Check className="w-4 h-4" />
-                Saved
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                Save Settings
-              </>
-            )}
-          </button>
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
-          >
+          <Button onClick={handleSave}>
+            <Save className="w-4 h-4" />
+            Save Settings
+          </Button>
+          <Button variant="outline" onClick={handleReset}>
             <RotateCcw className="w-4 h-4" />
             Reset to Defaults
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -225,18 +210,17 @@ export default function Settings() {
 function Field({ label, description, value, onChange, placeholder }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">
+      <Label className="text-sm text-slate-700 mb-1">
         {label}
-      </label>
+      </Label>
       {description && (
         <p className="text-xs text-slate-400 mb-1.5">{description}</p>
       )}
-      <input
+      <Input
         type="text"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-colors"
       />
     </div>
   );

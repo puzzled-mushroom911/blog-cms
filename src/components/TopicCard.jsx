@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Search, TrendingUp, Target, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import StatusBadge from './StatusBadge';
 
 function formatDate(dateStr) {
@@ -19,8 +21,8 @@ function difficultyColor(difficulty) {
 
 export default function TopicCard({ topic, onApprove, onResearch, onDiscard }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
-      <div className="flex items-start gap-4 p-4">
+    <Card className="hover:border-slate-300 hover:shadow-sm transition-all py-0">
+      <CardContent className="p-4 flex items-start gap-4">
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -101,7 +103,7 @@ export default function TopicCard({ topic, onApprove, onResearch, onDiscard }) {
             <Eye className="w-4 h-4" />
           </Link>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

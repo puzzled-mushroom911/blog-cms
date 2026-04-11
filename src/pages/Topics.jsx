@@ -8,6 +8,9 @@ import {
   Trash2,
   Search,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TopicCard from '../components/TopicCard';
 
 const STATUS_FILTERS = [
@@ -167,42 +170,45 @@ export default function Topics() {
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
+          <Input
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search topics or keywords..."
-            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 bg-white"
+            className="pl-9"
           />
         </div>
 
         {/* Status filter tabs */}
         <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
           {STATUS_FILTERS.map((f) => (
-            <button
+            <Button
               key={f.value}
+              variant="ghost"
+              size="sm"
               onClick={() => setStatusFilter(f.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={
                 statusFilter === f.value
-                  ? 'bg-slate-900 text-white'
+                  ? 'bg-slate-900 text-white hover:bg-slate-900 hover:text-white'
                   : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-              }`}
+              }
             >
               {f.label}
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* Sort */}
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-          className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Show discarded toggle (only visible when filter is "All") */}
