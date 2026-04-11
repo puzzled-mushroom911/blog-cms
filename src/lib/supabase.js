@@ -1,14 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const STORAGE_KEY = 'blog-cms-connection';
+let _client = null;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error(
-    'Missing Supabase environment variables.\n' +
-    'Copy .env.example to .env and fill in your Supabase project URL and anon key.\n' +
-    'You can find these at: https://app.supabase.com → Your Project → Settings → API'
-  );
+export function getStoredConnection() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.url && parsed?.anonKey) return parsed;
+    return null;
+  } catch {
+    return null;
+  }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export function saveConnection(url, anonKey) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ url, anonKey }));
+  _client = createClient(url, anonKey);
+  return _client;
+}
+
+export function clearConnection() {
+  localStorage.removeItem(STORAGE_KEY);
+  _client = null;
+}
+
+export function getClient() {
+  if (_client) return _client;
+  const conn = getStoredConnection();
+  if (!conn) return null;
+  _client = createClient(conn.url, conn.anonKey);
+  return _client;
+}
