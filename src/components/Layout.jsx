@@ -93,6 +93,23 @@ export default function Layout() {
             {!collapsed && <span>Sign out</span>}
           </button>
         </div>
+
+        {/* Moonify branding */}
+        <div className="px-3 py-3 border-t border-slate-100">
+          <a
+            href="https://moonify.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <img
+              src="https://moonify.ai/moonify-logo.svg"
+              alt="Moonify"
+              className="h-5 w-5 flex-shrink-0"
+            />
+            {!collapsed && <span>Built by Moonify AI</span>}
+          </a>
+        </div>
       </aside>
 
       {/* Main content */}
