@@ -17,7 +17,7 @@ function difficultyColor(difficulty) {
   return 'bg-red-50 text-red-700';
 }
 
-export default function TopicCard({ topic, onApprove, onDiscard }) {
+export default function TopicCard({ topic, onApprove, onResearch, onDiscard }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
       <div className="flex items-start gap-4 p-4">
@@ -55,7 +55,25 @@ export default function TopicCard({ topic, onApprove, onDiscard }) {
           </div>
         </div>
 
-        {/* Quick actions — only for 'researched' status */}
+        {/* Quick actions for 'idea' status — approve for research */}
+        {topic.status === 'idea' && (
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); onResearch?.(topic.id); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-violet-50 text-violet-700 hover:bg-violet-100 transition-colors"
+            >
+              Research
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onDiscard(topic.id); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+            >
+              Discard
+            </button>
+          </div>
+        )}
+
+        {/* Quick actions for 'researched' status — approve for writing */}
         {topic.status === 'researched' && (
           <div className="flex items-center gap-1 flex-shrink-0">
             <button
@@ -73,8 +91,8 @@ export default function TopicCard({ topic, onApprove, onDiscard }) {
           </div>
         )}
 
-        {/* View button for non-researched statuses */}
-        {topic.status !== 'researched' && (
+        {/* View button for other statuses */}
+        {topic.status !== 'researched' && topic.status !== 'idea' && (
           <Link
             to={`/topics/${topic.id}`}
             className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0"

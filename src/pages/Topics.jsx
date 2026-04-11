@@ -12,10 +12,11 @@ import TopicCard from '../components/TopicCard';
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'All' },
-  { value: 'researched', label: 'Researched' },
-  { value: 'approved', label: 'Approved' },
+  { value: 'idea', label: 'Ideas' },
+  { value: 'researched', label: 'Research Ready' },
+  { value: 'approved', label: 'Queued to Write' },
   { value: 'writing', label: 'Writing' },
-  { value: 'written', label: 'Written' },
+  { value: 'written', label: 'Complete' },
 ];
 
 const SORT_OPTIONS = [
@@ -66,6 +67,7 @@ export default function Topics() {
   }
 
   const stats = useMemo(() => ({
+    idea: topics.filter((t) => t.status === 'idea').length,
     researched: topics.filter((t) => t.status === 'researched').length,
     approved: topics.filter((t) => t.status === 'approved').length,
     writing: topics.filter((t) => t.status === 'writing').length,
@@ -121,15 +123,21 @@ export default function Topics() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
         <StatCard
-          label="Researched"
-          value={stats.researched}
+          label="Ideas"
+          value={stats.idea}
           icon={<Lightbulb className="w-4 h-4" />}
+          color="indigo"
+        />
+        <StatCard
+          label="Research Ready"
+          value={stats.researched}
+          icon={<Search className="w-4 h-4" />}
           color="violet"
         />
         <StatCard
-          label="Approved"
+          label="Queued to Write"
           value={stats.approved}
           icon={<ThumbsUp className="w-4 h-4" />}
           color="sky"
@@ -141,7 +149,7 @@ export default function Topics() {
           color="orange"
         />
         <StatCard
-          label="Written"
+          label="Complete"
           value={stats.written}
           icon={<CheckCircle className="w-4 h-4" />}
           color="emerald"
@@ -238,6 +246,7 @@ export default function Topics() {
             <TopicCard
               key={topic.id}
               topic={topic}
+              onResearch={(id) => updateTopicStatus(id, 'researched')}
               onApprove={(id) => updateTopicStatus(id, 'approved')}
               onDiscard={(id) => updateTopicStatus(id, 'discarded')}
             />
@@ -255,6 +264,7 @@ function StatCard({ label, value, icon, color }) {
     sky: 'bg-sky-50 text-sky-600 border-sky-100',
     violet: 'bg-violet-50 text-violet-600 border-violet-100',
     orange: 'bg-orange-50 text-orange-600 border-orange-100',
+    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100',
   };
 
   return (
