@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useConnection } from '../contexts/ConnectionContext';
 import { toast } from 'sonner';
 import { FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,11 +11,13 @@ import { getConfig } from '../config';
 
 export default function Login() {
   const { user, signIn } = useAuth();
+  const { connected, disconnect } = useConnection();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (user) return <Navigate to="/" replace />;
+  if (!connected) return <Navigate to="/connect" replace />;
 
   const config = getConfig();
 
@@ -82,6 +85,21 @@ export default function Login() {
             </Button>
           </div>
         </form>
+
+        <div className="mt-4 text-center space-y-2">
+          <p className="text-xs text-slate-400">
+            Don't have an account?{' '}
+            <a href="/setup" className="text-blue-600 hover:text-blue-700">
+              Set up here
+            </a>
+          </p>
+          <p className="text-xs text-slate-400">
+            Wrong Supabase project?{' '}
+            <button type="button" onClick={() => disconnect()} className="text-blue-600 hover:text-blue-700">
+              Disconnect
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );
