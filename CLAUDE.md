@@ -56,6 +56,42 @@ When the user references **"CMS"** in conversation, it means this blog CMS and i
 | created_at | timestamptz | Auto-set |
 | updated_at | timestamptz | Auto-updated via trigger |
 
+### `feedback` — Edit diffs (learning engine)
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| post_id | UUID | FK to blog_posts.id |
+| block_index | integer | Which content block was edited |
+| block_type | text | paragraph, heading, list, etc. |
+| original_text | text | What the AI originally generated |
+| edited_text | text | What the user changed it to |
+| context | text | Post title for retrieval context |
+| created_at | timestamptz | Auto-set |
+
+### `feedback_embeddings` — Vector store for semantic search
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | bigint | Auto-increment PK |
+| feedback_id | UUID | FK to feedback.id |
+| content | text | Formatted text that was embedded |
+| embedding | vector(384) | gte-small embedding (pgvector) |
+
+### `preferences` — Global style rules
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| rule | text | Style directive text |
+| category | text | tone, structure, vocabulary, formatting |
+| active | boolean | Toggle without deleting |
+| created_at | timestamptz | Auto-set |
+
+### `blog_posts.original_content` — AI baseline
+
+JSONB column added to `blog_posts`. Set once on insert (same value as `content`), never updated. Used to diff against user edits for feedback capture. `NULL` for posts created before Phase 2.
+
 ## Topic Pipeline Workflows
 
 ### Saving researched topics → "put topics in the CMS"
@@ -84,6 +120,15 @@ When the user says they made changes in the CMS:
 1. Query `blog_topics` ordered by `updated_at DESC` (limit 10) to see recent changes
 2. Also check `blog_posts` if the user mentions blog changes
 3. Report what changed (status updates, new notes, etc.)
+
+### Feedback loop — learning from user edits
+
+When the user edits a blog post in the CMS and saves, the system automatically:
+1. Diffs `original_content` against the current `content` block-by-block
+2. Inserts changed blocks into the `feedback` table
+3. An Edge Function generates vector embeddings for each feedback entry
+
+When generating new blog posts, query `preferences` for active style rules and use `query_feedback` RPC for relevant past corrections. See `prompts/generate-blog-post.md` for the full workflow.
 
 ## research_data JSONB Structure
 
