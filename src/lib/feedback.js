@@ -63,21 +63,48 @@ export function extractBlockText(block) {
 }
 
 /**
+ * Get editor notes for a specific block index.
+ * Returns formatted note text, or empty string if no notes.
+ */
+function getNotesForBlock(editorNotes, blockIndex) {
+  if (!editorNotes || !Array.isArray(editorNotes)) return '';
+  const blockNotes = editorNotes
+    .filter((n) => n.blockIndex === blockIndex)
+    .map((n) => n.text);
+  return blockNotes.length > 0 ? blockNotes.join('; ') : '';
+}
+
+/**
+ * Build context string from post title and optional editor notes.
+ */
+function buildContext(postTitle, notes) {
+  const parts = [postTitle || ''];
+  if (notes) parts.push(`Editor notes: ${notes}`);
+  return parts.filter(Boolean).join(' | ');
+}
+
+/**
  * Diff original_content against current content block-by-block.
  * Returns an array of feedback entries (not yet inserted).
  * Only compares blocks at the same index.
  * Skips blocks that were added/removed (length mismatch) and blocks where the type changed.
  *
+ * Also captures standalone editor notes — blocks that weren't text-edited but have
+ * notes attached. These are valuable feedback (e.g., "don't steer with school rankings")
+ * even without a text diff.
+ *
  * @param {Array} originalContent - The original AI-generated content blocks
  * @param {Array} currentContent - The current (user-edited) content blocks
  * @param {string} postTitle - The title of the post (used as context)
+ * @param {Array} editorNotes - Array of editor note objects ({blockIndex, text, ...})
  * @returns {Array} Array of feedback entry objects
  */
-export function diffBlocks(originalContent, currentContent, postTitle) {
+export function diffBlocks(originalContent, currentContent, postTitle, editorNotes) {
   if (!originalContent || !currentContent) return [];
 
   const minLength = Math.min(originalContent.length, currentContent.length);
   const entries = [];
+  const capturedBlocks = new Set();
 
   for (let i = 0; i < minLength; i++) {
     const orig = originalContent[i];
@@ -92,16 +119,53 @@ export function diffBlocks(originalContent, currentContent, postTitle) {
     // Skip non-text blocks
     if (origText === null || currText === null) continue;
 
-    // Skip identical blocks
-    if (origText === currText) continue;
+    // Skip identical blocks (unless they have notes)
+    const notes = getNotesForBlock(editorNotes, i);
+
+    if (origText === currText && !notes) continue;
+
+    // If text is identical but has notes, still capture as feedback
+    if (origText === currText && notes) {
+      entries.push({
+        block_index: i,
+        block_type: orig.type,
+        original_text: origText,
+        edited_text: origText,
+        context: buildContext(postTitle, notes),
+      });
+      capturedBlocks.add(i);
+      continue;
+    }
 
     entries.push({
       block_index: i,
       block_type: orig.type,
       original_text: origText,
       edited_text: currText,
-      context: postTitle || '',
+      context: buildContext(postTitle, notes),
     });
+    capturedBlocks.add(i);
+  }
+
+  // Capture notes on blocks beyond the minLength range (added blocks with notes)
+  if (editorNotes && Array.isArray(editorNotes)) {
+    for (const note of editorNotes) {
+      if (capturedBlocks.has(note.blockIndex)) continue;
+      if (note.blockIndex >= currentContent.length) continue;
+
+      const block = currentContent[note.blockIndex];
+      const blockText = extractBlockText(block);
+      if (blockText === null) continue;
+
+      entries.push({
+        block_index: note.blockIndex,
+        block_type: block.type,
+        original_text: blockText,
+        edited_text: blockText,
+        context: buildContext(postTitle, note.text),
+      });
+      capturedBlocks.add(note.blockIndex);
+    }
   }
 
   return entries;
@@ -118,10 +182,11 @@ export function diffBlocks(originalContent, currentContent, postTitle) {
  * @param {Array} originalContent - The original AI-generated content blocks
  * @param {Array} currentContent - The current (user-edited) content blocks
  * @param {string} postTitle - The title of the post
+ * @param {Array} editorNotes - Array of editor note objects
  * @returns {Promise<Array>} Array of inserted feedback row IDs
  */
-export async function captureFeedback(supabase, postId, originalContent, currentContent, postTitle) {
-  const entries = diffBlocks(originalContent, currentContent, postTitle);
+export async function captureFeedback(supabase, postId, originalContent, currentContent, postTitle, editorNotes) {
+  const entries = diffBlocks(originalContent, currentContent, postTitle, editorNotes);
   if (entries.length === 0) return [];
 
   // Fetch existing feedback for this post to deduplicate

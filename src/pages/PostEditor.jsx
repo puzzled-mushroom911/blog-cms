@@ -125,9 +125,9 @@ export default function PostEditor() {
       toast.error('Failed to publish: ' + error.message);
     } else {
       setPost(prev => ({ ...prev, status: 'published' }));
-      // Capture feedback from edits (async, non-blocking)
+      // Capture feedback from edits + notes (async, non-blocking)
       if (originalContent) {
-        captureFeedback(supabase, post.id, originalContent, post.content, post.title)
+        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes)
           .catch(() => {}); // Best-effort — don't block publish
       }
       triggerDeploy();
@@ -165,9 +165,9 @@ export default function PostEditor() {
     if (error) {
       toast.error('Failed to save: ' + error.message);
     } else {
-      // Capture feedback from edits (async, non-blocking)
+      // Capture feedback from edits + notes (async, non-blocking)
       if (originalContent) {
-        captureFeedback(supabase, post.id, originalContent, post.content, post.title)
+        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes)
           .catch(() => {}); // Best-effort — don't block save
       }
       // Trigger site rebuild when a post is published
