@@ -41,13 +41,33 @@ Both projects use the same Supabase project. The CMS writes to the database (aut
 
 The CMS is the review layer between AI-generated content and your live website. It gives you a clean interface to manage post status (draft / needs review / published), edit metadata and SEO fields, and preview how content will look before it goes live.
 
+## Two Ways to Get Started
+
+### Option A: Use the Hosted Version (fastest)
+
+No cloning, no installs. Use the hosted CMS at **[cms.moonify.ai](https://cms.moonify.ai)**.
+
+<a name="getting-started-hosted"></a>
+
+1. **Create a free Supabase project** at [supabase.com](https://supabase.com/)
+2. **Run the database migrations** -- In your Supabase dashboard, go to SQL Editor and run each file from `supabase/migrations/` in order (copy from [the migrations folder](https://github.com/puzzled-mushroom911/blog-cms/tree/main/supabase/migrations))
+3. **Create a CMS user** -- In Supabase > Authentication > Users, click "Add user", enter your email/password, check "Auto Confirm User"
+4. **Connect** -- Go to [cms.moonify.ai](https://cms.moonify.ai), paste your Supabase Project URL and anon key, and sign in
+5. **Start generating content** -- Install [Claude Code](https://claude.ai/download) and use the prompts in the `prompts/` folder to generate blog posts from your YouTube transcripts
+
+That's it. Your content lives in your own Supabase project -- the hosted CMS just reads and writes to it.
+
+### Option B: Self-Host (full control)
+
+Clone the repo and run it yourself. Follow the setup instructions below.
+
 ## Prerequisites
 
 - **Node.js 18+** -- [Download here](https://nodejs.org/) (free)
 - **Supabase account** -- [Sign up here](https://supabase.com/) (free tier is plenty)
 - **Claude Code** (optional but recommended) -- [Get it here](https://claude.ai/download)
 
-## Setup (5 minutes)
+## Self-Host Setup (5 minutes)
 
 ### 1. Clone the repo
 

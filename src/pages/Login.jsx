@@ -36,9 +36,11 @@ export default function Login() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-6 h-6 text-white" />
-          </div>
+          <img
+            src="https://moonify.ai/moonify-logo.svg"
+            alt="Moonify"
+            className="h-16 w-16 mx-auto mb-4"
+          />
           <h1 className="text-xl font-bold text-slate-900">{config.cmsTitle}</h1>
           <p className="text-sm text-slate-500 mt-1">Sign in to manage content</p>
         </div>
