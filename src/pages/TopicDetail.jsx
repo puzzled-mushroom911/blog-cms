@@ -12,7 +12,11 @@ import {
   DollarSign,
   BarChart3,
   ExternalLink,
+  MessageCircleQuestion,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
+import { BarChart, Bar, ResponsiveContainer, Tooltip } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,6 +38,8 @@ export default function TopicDetail() {
   const [topic, setTopic] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sortField, setSortField] = useState('search_volume');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
     loadTopic();
@@ -138,11 +144,28 @@ export default function TopicDetail() {
                 label="Primary Keyword"
                 value={topic.primary_keyword}
               />
-              <MetricCard
-                icon={<TrendingUp className="w-4 h-4" />}
-                label="Search Volume"
-                value={`${(topic.search_volume || 0).toLocaleString()}/mo`}
-              />
+              <div>
+                <MetricCard
+                  icon={<TrendingUp className="w-4 h-4" />}
+                  label="Search Volume"
+                  value={`${(topic.search_volume || 0).toLocaleString()}/mo`}
+                />
+                {/* Monthly Search Trend sparkline */}
+                {research.keyword_data?.monthly_searches?.length > 0 && (
+                  <div className="bg-white rounded-b-xl border border-t-0 border-slate-200 px-3 pb-3 -mt-0.5">
+                    <ResponsiveContainer width="100%" height={120}>
+                      <BarChart data={research.keyword_data.monthly_searches}>
+                        <Tooltip
+                          contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                          labelStyle={{ fontWeight: 600, color: '#334155' }}
+                          formatter={(value) => [value.toLocaleString(), 'Volume']}
+                        />
+                        <Bar dataKey="volume" fill="#6366f1" radius={[2, 2, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
               <MetricCard
                 icon={<Target className="w-4 h-4" />}
                 label="Keyword Difficulty"
@@ -300,6 +323,185 @@ export default function TopicDetail() {
                       </li>
                     ))}
                   </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Related Keywords Table */}
+            {research.related_keywords?.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-sm font-semibold text-slate-700 mb-3">Related Keywords</h2>
+                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        {[
+                          { key: 'keyword', label: 'Keyword' },
+                          { key: 'search_volume', label: 'Volume' },
+                          { key: 'keyword_difficulty', label: 'Difficulty' },
+                          { key: 'cpc', label: 'CPC' },
+                          { key: 'competition_level', label: 'Competition' },
+                        ].map((col) => (
+                          <th
+                            key={col.key}
+                            className="text-left px-4 py-3 font-medium text-slate-600 cursor-pointer hover:text-slate-900 select-none"
+                            onClick={() => {
+                              if (sortField === col.key) {
+                                setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                              } else {
+                                setSortField(col.key);
+                                setSortDirection('desc');
+                              }
+                            }}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              {col.label}
+                              {sortField === col.key && (
+                                sortDirection === 'asc'
+                                  ? <ChevronUp className="w-3 h-3" />
+                                  : <ChevronDown className="w-3 h-3" />
+                              )}
+                            </span>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...research.related_keywords]
+                        .sort((a, b) => {
+                          const aVal = a[sortField] ?? '';
+                          const bVal = b[sortField] ?? '';
+                          const cmp = typeof aVal === 'number' ? aVal - bVal : String(aVal).localeCompare(String(bVal));
+                          return sortDirection === 'asc' ? cmp : -cmp;
+                        })
+                        .map((kw, i) => (
+                          <tr key={i} className={i % 2 ? 'bg-slate-50/50' : ''}>
+                            <td className="px-4 py-3 font-medium text-slate-700">{kw.keyword}</td>
+                            <td className="px-4 py-3 text-slate-600">{(kw.search_volume || 0).toLocaleString()}</td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                (kw.keyword_difficulty || 0) < 30
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : (kw.keyword_difficulty || 0) <= 60
+                                    ? 'bg-amber-50 text-amber-700'
+                                    : 'bg-red-50 text-red-700'
+                              }`}>
+                                {kw.keyword_difficulty ?? '—'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-slate-600">${(kw.cpc || 0).toFixed(2)}</td>
+                            <td className="px-4 py-3 text-slate-600 capitalize">{kw.competition_level || '—'}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* SERP Features & Results (enhanced) */}
+            {(research.serp_features?.length > 0 || research.serp_results?.length > 0) && (
+              <div className="mb-8">
+                <h2 className="text-sm font-semibold text-slate-700 mb-3">SERP Analysis</h2>
+                <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+                  {/* SERP feature badges */}
+                  {research.serp_features?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-2">SERP Features</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {research.serp_features.map((feature, i) => {
+                          const colorMap = {
+                            featured_snippet: 'bg-violet-50 text-violet-700',
+                            people_also_ask: 'bg-blue-50 text-blue-700',
+                            local_pack: 'bg-emerald-50 text-emerald-700',
+                            knowledge_panel: 'bg-amber-50 text-amber-700',
+                            video: 'bg-red-50 text-red-700',
+                            image: 'bg-pink-50 text-pink-700',
+                          };
+                          const color = colorMap[feature] || 'bg-slate-100 text-slate-600';
+                          return (
+                            <span key={i} className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
+                              {feature.replace(/_/g, ' ')}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SERP results list */}
+                  {research.serp_results?.length > 0 && (
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium text-slate-500">Top Results</p>
+                      {research.serp_results.map((result, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center text-xs font-semibold">
+                            {result.position || i + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-800 leading-tight">{result.title}</p>
+                            <p className="text-xs text-slate-400 mt-0.5">{result.domain}</p>
+                            {result.url && (
+                              <a
+                                href={result.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-500 hover:text-indigo-700 truncate block mt-0.5"
+                              >
+                                {result.url.length > 60 ? result.url.slice(0, 60) + '...' : result.url}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* People Also Ask */}
+            {research.people_also_ask?.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-sm font-semibold text-slate-700 mb-3">People Also Ask</h2>
+                <div className="bg-white rounded-xl border border-slate-200 p-4">
+                  <ul className="space-y-2.5">
+                    {research.people_also_ask.map((question, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
+                        <MessageCircleQuestion className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                        {question}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Competitors Table (enhanced — supports both old and new format) */}
+            {research.competitors?.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-sm font-semibold text-slate-700 mb-3">Competitors</h2>
+                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="text-left px-4 py-3 font-medium text-slate-600">Domain</th>
+                        <th className="text-left px-4 py-3 font-medium text-slate-600">Avg Position</th>
+                        <th className="text-left px-4 py-3 font-medium text-slate-600">Est. Traffic</th>
+                        <th className="text-left px-4 py-3 font-medium text-slate-600">Keywords</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {research.competitors.map((comp, i) => (
+                        <tr key={i} className={i % 2 ? 'bg-slate-50/50' : ''}>
+                          <td className="px-4 py-3 font-medium text-slate-700">{comp.domain}</td>
+                          <td className="px-4 py-3 text-slate-600">{comp.avg_position ?? '—'}</td>
+                          <td className="px-4 py-3 text-slate-600">{(comp.estimated_traffic || 0).toLocaleString()}</td>
+                          <td className="px-4 py-3 text-slate-600">{(comp.relevant_keywords || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}

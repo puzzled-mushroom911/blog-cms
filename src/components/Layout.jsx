@@ -13,11 +13,13 @@ import {
   Globe,
   Inbox,
   CalendarDays,
+  BarChart3,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Blog Posts', icon: LayoutDashboard, end: true },
   { to: '/topics', label: 'Content Pipeline', icon: Lightbulb },
+  { to: '/seo', label: 'SEO Dashboard', icon: BarChart3 },
   { to: '/seo-pages', label: 'SEO Pages', icon: Globe },
   { to: '/approval', label: 'HITL Queue', icon: Inbox },
   { to: '/calendar', label: 'Calendar', icon: CalendarDays },

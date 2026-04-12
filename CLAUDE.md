@@ -132,10 +132,45 @@ When generating new blog posts, query `preferences` for active style rules and u
 
 ## research_data JSONB Structure
 
-Always save research data in this format for consistency:
+Save research data in this format. The structure supports both manual research and DataForSEO-powered research. All fields are optional — the CMS renders whatever is present.
 
 ```json
 {
+  "keyword_data": {
+    "monthly_searches": [{ "month": "2026-03", "volume": 1200 }],
+    "competition_index": 0.45,
+    "high_top_of_page_bid": 3.50,
+    "low_top_of_page_bid": 1.20
+  },
+  "related_keywords": [
+    {
+      "keyword": "best neighborhoods st pete",
+      "search_volume": 880,
+      "keyword_difficulty": 35,
+      "cpc": 2.10,
+      "competition_level": "medium"
+    }
+  ],
+  "serp_results": [
+    {
+      "position": 1,
+      "title": "Top 10 Neighborhoods in St. Pete",
+      "url": "https://example.com/neighborhoods",
+      "domain": "example.com",
+      "description": "...",
+      "type": "organic"
+    }
+  ],
+  "serp_features": ["featured_snippet", "people_also_ask", "local_pack"],
+  "people_also_ask": ["What are the best neighborhoods?", "Is St Pete safe?"],
+  "competitors": [
+    {
+      "domain": "example.com",
+      "avg_position": 3.2,
+      "estimated_traffic": 450,
+      "relevant_keywords": 12
+    }
+  ],
   "competitor_analysis": [
     {
       "domain": "example.com",
@@ -143,11 +178,8 @@ Always save research data in this format for consistency:
       "what_they_miss": "..."
     }
   ],
-  "content_gaps": [
-    "Gap 1 description",
-    "Gap 2 description"
-  ],
   "ai_search_presence": {
+    "ai_search_volume": 320,
     "summary": "How LLMs currently cover this topic",
     "mentions_our_site": false,
     "top_mentioned_domains": ["domain1.com", "domain2.com"]
@@ -157,13 +189,13 @@ Always save research data in this format for consistency:
     "content_types": ["article", "video", "local_pack"],
     "featured_snippets": true
   },
-  "suggested_angles": [
-    "Angle 1 — why it works for our audience",
-    "Angle 2 — differentiation opportunity"
-  ],
-  "full_brief": "Complete markdown SEO brief including all of the above in readable format"
+  "content_gaps": ["Gap 1 description", "Gap 2 description"],
+  "suggested_angles": ["Angle 1", "Angle 2"],
+  "full_brief": "Complete markdown SEO brief"
 }
 ```
+
+**DataForSEO research:** Use the prompt template at `prompts/research-topic.md` to research topics via Claude Code + DataForSEO MCP tools.
 
 ## Content Block Types (for blog_posts.content)
 
