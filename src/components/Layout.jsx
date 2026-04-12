@@ -32,7 +32,7 @@ export default function Layout() {
   const config = getConfig();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="h-screen overflow-hidden bg-slate-50 flex">
       {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-full bg-white border-r border-slate-200 flex flex-col z-30 transition-all duration-200 ${
@@ -116,7 +116,7 @@ export default function Layout() {
 
       {/* Main content */}
       <main
-        className={`flex-1 transition-all duration-200 ${
+        className={`flex-1 h-screen overflow-y-auto transition-all duration-200 ${
           collapsed ? 'ml-16' : 'ml-60'
         }`}
       >
