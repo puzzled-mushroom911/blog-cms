@@ -101,13 +101,13 @@ export default function Dashboard() {
           label="Published"
           value={stats.published}
           icon={<Eye className="w-4 h-4" />}
-          color="emerald"
+          color={stats.published > 0 ? 'emerald' : 'slate'}
         />
         <StatCard
           label="Scheduled"
           value={stats.scheduled}
           icon={<CalendarClock className="w-4 h-4" />}
-          color="blue"
+          color={stats.scheduled > 0 ? 'blue' : 'slate'}
         />
         <StatCard
           label="Drafts"
@@ -119,7 +119,7 @@ export default function Dashboard() {
           label="Needs Review"
           value={stats.needsReview}
           icon={<AlertCircle className="w-4 h-4" />}
-          color="amber"
+          color={stats.needsReview > 0 ? 'amber' : 'slate'}
         />
       </div>
 
