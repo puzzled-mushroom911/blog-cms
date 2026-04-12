@@ -39,7 +39,7 @@ export default function Login() {
           <img
             src="https://moonify.ai/moonify-logo.svg"
             alt="Moonify"
-            className="h-16 w-16 mx-auto mb-4"
+            className="h-12 mx-auto mb-4"
           />
           <h1 className="text-xl font-bold text-slate-900">{config.cmsTitle}</h1>
           <p className="text-sm text-slate-500 mt-1">Sign in to manage content</p>

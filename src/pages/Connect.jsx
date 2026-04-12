@@ -54,7 +54,7 @@ export default function Connect() {
           <img
             src="https://moonify.ai/moonify-logo.svg"
             alt="Moonify"
-            className="h-14 w-14 mx-auto mb-4"
+            className="h-10 mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold text-slate-900">Connect Your Database</h1>
           <p className="text-sm text-slate-500 mt-2 leading-relaxed">
