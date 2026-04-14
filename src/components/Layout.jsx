@@ -40,17 +40,12 @@ export default function Layout() {
         }`}
       >
         {/* Logo area */}
-        <div className="h-14 flex items-center px-4 border-b border-slate-100 gap-3">
+        <div className="h-14 flex items-center px-4 border-b border-slate-100">
           <img
             src="https://moonify.ai/moonify-logo.svg"
             alt="Moonify"
-            className="w-8 h-8 flex-shrink-0"
+            className={`flex-shrink-0 ${collapsed ? 'w-8 h-8' : 'h-9'}`}
           />
-          {!collapsed && (
-            <span className="font-semibold text-slate-900 text-sm truncate">
-              Moonify
-            </span>
-          )}
         </div>
 
         {/* Nav */}
@@ -104,14 +99,9 @@ export default function Layout() {
             href="https://moonify.ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
           >
-            <img
-              src="https://moonify.ai/moonify-logo.svg"
-              alt="Moonify"
-              className="h-5 w-5 flex-shrink-0"
-            />
-            {!collapsed && <span>Built by Moonify AI</span>}
+            {!collapsed ? 'Built by Moonify AI' : '·'}
           </a>
         </div>
       </aside>
