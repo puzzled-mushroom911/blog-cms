@@ -13,7 +13,7 @@ const defaults = {
   siteName: 'Living in St. Pete',
   siteUrl: 'https://livinginstpetefl.com',
   defaultAuthor: 'Aaron & Aubrey Chand',
-  cmsTitle: 'LIT Blog CMS',
+  cmsTitle: 'Moonify',
   blogPathPrefix: '/blog',       // path on the public site where posts live
   youtubeChannel: 'https://www.youtube.com/@livinginst-pete',
   pexelsApiKey: '',              // Pexels API key for stock image search

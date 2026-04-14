@@ -41,12 +41,14 @@ export default function Layout() {
       >
         {/* Logo area */}
         <div className="h-14 flex items-center px-4 border-b border-slate-100 gap-3">
-          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center flex-shrink-0">
-            <FileText className="w-4 h-4 text-white" />
-          </div>
+          <img
+            src="https://moonify.ai/moonify-logo.svg"
+            alt="Moonify"
+            className="w-8 h-8 flex-shrink-0"
+          />
           {!collapsed && (
             <span className="font-semibold text-slate-900 text-sm truncate">
-              {config.cmsTitle}
+              Moonify
             </span>
           )}
         </div>
