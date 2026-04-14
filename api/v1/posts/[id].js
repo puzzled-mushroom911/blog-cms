@@ -48,6 +48,7 @@ async function updatePost(req, res, supabase, workspace_id, id) {
     'title', 'slug', 'excerpt', 'date', 'read_time', 'author',
     'category', 'tags', 'youtube_id', 'image', 'meta_description',
     'keywords', 'content', 'status', 'editor_notes',
+    'sources', 'ai_reasoning',
   ];
 
   const updates = {};

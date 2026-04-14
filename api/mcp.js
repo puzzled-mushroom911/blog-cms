@@ -110,6 +110,13 @@ function createMcpServer(supabase, workspace_id) {
         keywords: z.string().optional().describe('SEO keywords'),
         content: z.array(z.record(z.any())).optional().describe('Array of content block objects'),
         status: z.enum(['draft', 'needs-review', 'published']).optional().default('draft'),
+        sources: z.array(z.object({
+          url: z.string().optional(),
+          title: z.string().optional(),
+          type: z.enum(['reddit', 'youtube', 'government', 'news', 'data', 'mls', 'local', 'other']).optional(),
+          note: z.string().optional().describe('Why this source matters'),
+        })).optional().describe('Research sources (internal only, not shown on public site)'),
+        ai_reasoning: z.string().optional().describe('How the AI researched and structured the content (internal only)'),
       }),
     },
     async (args) => {
@@ -133,6 +140,8 @@ function createMcpServer(supabase, workspace_id) {
         original_content: args.content || [],
         status: args.status,
         editor_notes: [],
+        sources: args.sources || [],
+        ai_reasoning: args.ai_reasoning || '',
       };
 
       const { data, error } = await supabase
@@ -169,6 +178,13 @@ function createMcpServer(supabase, workspace_id) {
         content: z.array(z.record(z.any())).optional(),
         status: z.enum(['draft', 'needs-review', 'published']).optional(),
         editor_notes: z.array(z.record(z.any())).optional(),
+        sources: z.array(z.object({
+          url: z.string().optional(),
+          title: z.string().optional(),
+          type: z.enum(['reddit', 'youtube', 'government', 'news', 'data', 'mls', 'local', 'other']).optional(),
+          note: z.string().optional(),
+        })).optional(),
+        ai_reasoning: z.string().optional(),
       }),
     },
     async ({ id, ...fields }) => {

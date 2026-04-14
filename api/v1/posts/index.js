@@ -64,6 +64,8 @@ async function createPost(req, res, supabase, workspace_id) {
     original_content: body.content || [],
     status: body.status || 'draft',
     editor_notes: body.editor_notes || [],
+    sources: body.sources || [],
+    ai_reasoning: body.ai_reasoning || '',
   };
 
   const { data, error } = await supabase
