@@ -19,6 +19,7 @@ import SeoPageEditor from './pages/SeoPageEditor';
 import ApprovalQueue from './pages/ApprovalQueue';
 import Calendar from './pages/Calendar';
 import SeoDashboard from './pages/SeoDashboard';
+import Docs from './pages/Docs';
 
 export default function App() {
   const { loading } = useAuth();
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="approval" element={<ApprovalQueue />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="seo" element={<SeoDashboard />} />
+          <Route path="docs" element={<Docs />} />
         </Route>
 
         {/* Fallback */}
