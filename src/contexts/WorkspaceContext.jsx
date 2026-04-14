@@ -81,20 +81,22 @@ export function useWorkspace() {
  * and assign existing data to it.
  */
 async function ensureDefaultWorkspace(supabase, user) {
-  // Check if any workspaces exist at all (maybe RLS is blocking)
-  // Try to create one
+  // Generate a unique slug from the user's ID
+  const shortId = user.id.split('-')[0];
+  const slug = `workspace-${shortId}`;
+
   const { data: ws, error: createError } = await supabase
     .from('workspaces')
     .insert({
       name: 'My Workspace',
-      slug: 'default',
+      slug,
       owner_id: user.id,
     })
     .select()
     .single();
 
   if (createError) {
-    // Workspace might already exist with slug 'default' — try to find it
+    // Workspace might already exist — try to find it
     const { data: existing } = await supabase
       .from('workspaces')
       .select('*')
@@ -125,15 +127,6 @@ async function ensureDefaultWorkspace(supabase, user) {
       user_id: user.id,
       role: 'owner',
     });
-
-  // Backfill existing content with this workspace_id
-  const tables = ['blog_posts', 'blog_topics', 'seo_pages', 'feedback', 'feedback_embeddings', 'preferences'];
-  for (const table of tables) {
-    await supabase
-      .from(table)
-      .update({ workspace_id: ws.id })
-      .is('workspace_id', null);
-  }
 
   return { ...ws, role: 'owner' };
 }

@@ -179,20 +179,64 @@ export default function Dashboard() {
           <p className="text-sm text-slate-400 mt-4">Loading posts...</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
-          <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-sm text-slate-500 font-medium">No posts found</p>
-          <p className="text-xs text-slate-400 mt-1">
-            {searchQuery || statusFilter !== 'all'
-              ? 'Try adjusting your filters'
-              : (
-                <span className="block mt-2 text-slate-400">
-                  Blog posts created by your AI assistant will appear here for review.<br />
-                  Use the sidebar to navigate to <strong className="text-slate-500">Topics</strong> for keyword research or <strong className="text-slate-500">SEO Pages</strong> for programmatic content.
-                </span>
-              )
-            }
-          </p>
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          {searchQuery || statusFilter !== 'all' ? (
+            <div className="text-center py-16">
+              <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-sm text-slate-500 font-medium">No posts match your filters</p>
+              <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filter criteria.</p>
+            </div>
+          ) : (
+            <div className="p-8">
+              <div className="text-center mb-8">
+                <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-slate-800">Welcome to your CMS</h3>
+                <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
+                  Your dashboard is empty because no blog posts have been created yet.
+                  Here's how to get started:
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mb-3">
+                    <span className="text-sm font-bold text-blue-600">1</span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-700">Use Claude Code</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Ask your AI assistant to write a blog post. It will appear here as a draft for you to review.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center mb-3">
+                    <span className="text-sm font-bold text-emerald-600">2</span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-700">Review & edit</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Open any draft to edit content, add images, adjust SEO metadata, and leave editor notes.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center mb-3">
+                    <span className="text-sm font-bold text-amber-600">3</span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-700">Publish</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    When you're happy with a post, hit publish. Your website updates automatically.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-xs text-slate-400">
+                  Check out <strong className="text-slate-500">API Docs</strong> in the sidebar for setup instructions,
+                  or visit <strong className="text-slate-500">Content Pipeline</strong> to research topics first.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-2">

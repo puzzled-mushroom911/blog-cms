@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 
 export default function Signup() {
   const { user, signUp } = useAuth();
-  const { connectHosted, hasHostedCredentials } = useConnection();
+  const { connectHosted, hasHostedCredentials, supabase } = useConnection();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,8 +34,10 @@ export default function Signup() {
     if (authError) {
       setError(authError.message);
     } else {
-      toast.success('Account created!');
-      navigate('/');
+      // Sign out so user goes through login flow properly
+      if (supabase) await supabase.auth.signOut();
+      toast.success('Account created! Please sign in.');
+      navigate('/login');
     }
   }
 
