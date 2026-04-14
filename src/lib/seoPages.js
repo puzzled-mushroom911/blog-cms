@@ -5,14 +5,16 @@ import { getClient } from './supabase';
  * @param {Object} filters - { status, page_type, search }
  * @param {string} orderBy - Column to order by (default: 'created_at')
  * @param {boolean} ascending - Sort direction (default: false = newest first)
+ * @param {string|null} workspaceId - Workspace ID for scoping
  */
-export async function fetchSeoPages({ status, page_type, search } = {}, orderBy = 'created_at', ascending = false) {
+export async function fetchSeoPages({ status, page_type, search } = {}, orderBy = 'created_at', ascending = false, workspaceId = null) {
   const supabase = getClient();
   let query = supabase
     .from('seo_pages')
     .select('id, slug, page_type, title, h1, meta_description, keywords, status, scheduled_date, created_at, updated_at')
     .order(orderBy, { ascending });
 
+  if (workspaceId) query = query.eq('workspace_id', workspaceId);
   if (status) query = query.eq('status', status);
   if (page_type) query = query.eq('page_type', page_type);
   if (search) query = query.ilike('title', `%${search}%`);
@@ -25,14 +27,15 @@ export async function fetchSeoPages({ status, page_type, search } = {}, orderBy 
 /**
  * Fetch a single SEO page by ID (full record including content and data).
  */
-export async function fetchSeoPageById(id) {
+export async function fetchSeoPageById(id, workspaceId = null) {
   const supabase = getClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('seo_pages')
     .select('*')
-    .eq('id', id)
-    .single();
+    .eq('id', id);
+  if (workspaceId) query = query.eq('workspace_id', workspaceId);
 
+  const { data, error } = await query.single();
   if (error) throw error;
   return data;
 }
@@ -111,14 +114,17 @@ export async function batchApproveSeoPages(ids) {
 /**
  * Fetch pages for the approval queue: needs-review pages, ordered by scheduled_date.
  */
-export async function fetchApprovalQueue() {
+export async function fetchApprovalQueue(workspaceId = null) {
   const supabase = getClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('seo_pages')
     .select('id, slug, page_type, title, h1, meta_description, keywords, status, scheduled_date, content, created_at')
     .eq('status', 'needs-review')
     .order('scheduled_date', { ascending: true, nullsFirst: false });
 
+  if (workspaceId) query = query.eq('workspace_id', workspaceId);
+
+  const { data, error } = await query;
   if (error) throw error;
   return data;
 }
@@ -127,7 +133,7 @@ export async function fetchApprovalQueue() {
  * Fetch all scheduled content (blog_posts + seo_pages) for a given month.
  * Returns unified items with a `content_type` field ('blog' or 'seo').
  */
-export async function fetchCalendarItems(year, month) {
+export async function fetchCalendarItems(year, month, workspaceId = null) {
   const supabase = getClient();
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
   const endMonth = month === 12 ? 1 : month + 1;
@@ -135,23 +141,27 @@ export async function fetchCalendarItems(year, month) {
   const endDate = `${endYear}-${String(endMonth).padStart(2, '0')}-01`;
 
   // Fetch blog posts with a date in this month
-  const { data: blogs, error: blogError } = await supabase
+  let blogQuery = supabase
     .from('blog_posts')
     .select('id, title, slug, status, date, category')
     .gte('date', startDate)
     .lt('date', endDate)
     .order('date', { ascending: true });
+  if (workspaceId) blogQuery = blogQuery.eq('workspace_id', workspaceId);
 
+  const { data: blogs, error: blogError } = await blogQuery;
   if (blogError) throw blogError;
 
   // Fetch SEO pages with a scheduled_date in this month
-  const { data: seoPages, error: seoError } = await supabase
+  let seoQuery = supabase
     .from('seo_pages')
     .select('id, title, slug, status, scheduled_date, page_type')
     .gte('scheduled_date', startDate)
     .lt('scheduled_date', endDate)
     .order('scheduled_date', { ascending: true });
+  if (workspaceId) seoQuery = seoQuery.eq('workspace_id', workspaceId);
 
+  const { data: seoPages, error: seoError } = await seoQuery;
   if (seoError) throw seoError;
 
   // Unify into calendar items
@@ -182,13 +192,14 @@ export async function fetchCalendarItems(year, month) {
 /**
  * Fetch editorial research entries, optionally filtered.
  */
-export async function fetchEditorialResearch({ unused_only = false, source_type } = {}) {
+export async function fetchEditorialResearch({ unused_only = false, source_type } = {}, workspaceId = null) {
   const supabase = getClient();
   let query = supabase
     .from('editorial_research')
     .select('*')
     .order('created_at', { ascending: false });
 
+  if (workspaceId) query = query.eq('workspace_id', workspaceId);
   if (unused_only) query = query.is('used_in_post_id', null);
   if (source_type) query = query.eq('source_type', source_type);
 

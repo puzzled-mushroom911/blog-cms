@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSupabase } from '../hooks/useSupabase';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import { toast } from 'sonner';
 import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
@@ -15,6 +16,7 @@ import {
 
 export default function PostEditor() {
   const supabase = useSupabase();
+  const { workspaceId } = useWorkspace();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -33,11 +35,12 @@ export default function PostEditor() {
 
   async function loadPost() {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('blog_posts')
       .select('*')
-      .eq('id', id)
-      .single();
+      .eq('id', id);
+    if (workspaceId) query = query.eq('workspace_id', workspaceId);
+    const { data, error } = await query.single();
 
     if (error || !data) {
       navigate('/');
@@ -129,7 +132,7 @@ export default function PostEditor() {
       setPost(prev => ({ ...prev, status: 'published' }));
       // Capture feedback from edits + notes (async, non-blocking)
       if (originalContent) {
-        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes)
+        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes, workspaceId)
           .catch(() => {}); // Best-effort — don't block publish
       }
       triggerDeploy();
@@ -171,7 +174,7 @@ export default function PostEditor() {
     } else {
       // Capture feedback from edits + notes (async, non-blocking)
       if (originalContent) {
-        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes)
+        captureFeedback(supabase, post.id, originalContent, post.content, post.title, editorNotes, workspaceId)
           .catch(() => {}); // Best-effort — don't block save
       }
       // Trigger site rebuild when a post is published

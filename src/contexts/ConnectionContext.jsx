@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { getClient, saveConnection, clearConnection, getStoredConnection } from '../lib/supabase';
+import { getClient, saveConnection, clearConnection, getStoredConnection, isHostedMode } from '../lib/supabase';
 
 const ConnectionContext = createContext(null);
 
 export function ConnectionProvider({ children }) {
-  const [connected, setConnected] = useState(() => !!getStoredConnection());
+  // In hosted mode, we're always connected (env vars provide credentials)
+  const [connected, setConnected] = useState(() => isHostedMode || !!getStoredConnection());
 
   const connect = useCallback((url, anonKey) => {
     saveConnection(url, anonKey);
@@ -12,6 +13,7 @@ export function ConnectionProvider({ children }) {
   }, []);
 
   const disconnect = useCallback(() => {
+    if (isHostedMode) return; // Can't disconnect in hosted mode
     clearConnection();
     setConnected(false);
   }, []);
@@ -19,7 +21,7 @@ export function ConnectionProvider({ children }) {
   const supabase = connected ? getClient() : null;
 
   return (
-    <ConnectionContext.Provider value={{ connected, supabase, connect, disconnect }}>
+    <ConnectionContext.Provider value={{ connected, supabase, connect, disconnect, isHostedMode }}>
       {children}
     </ConnectionContext.Provider>
   );

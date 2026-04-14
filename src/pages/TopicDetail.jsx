@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSupabase } from '../hooks/useSupabase';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import { toast } from 'sonner';
 import StatusBadge from '../components/StatusBadge';
 import {
@@ -58,6 +59,7 @@ const SERP_FEATURE_META = {
 
 export default function TopicDetail() {
   const supabase = useSupabase();
+  const { workspaceId } = useWorkspace();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -76,11 +78,12 @@ export default function TopicDetail() {
 
   async function loadTopic() {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('blog_topics')
       .select('*')
-      .eq('id', id)
-      .single();
+      .eq('id', id);
+    if (workspaceId) query = query.eq('workspace_id', workspaceId);
+    const { data, error } = await query.single();
 
     if (error || !data) {
       navigate('/topics');

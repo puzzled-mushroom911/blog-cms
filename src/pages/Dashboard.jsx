@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSupabase } from '../hooks/useSupabase';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import { FileText, Eye, PenTool, AlertCircle, Search, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +17,7 @@ const STATUS_FILTERS = [
 
 export default function Dashboard() {
   const supabase = useSupabase();
+  const { workspaceId } = useWorkspace();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -28,10 +30,12 @@ export default function Dashboard() {
 
   async function loadPosts() {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('blog_posts')
       .select('*')
       .order('date', { ascending: false });
+    if (workspaceId) query = query.eq('workspace_id', workspaceId);
+    const { data, error } = await query;
 
     if (!error && data) {
       setPosts(data);

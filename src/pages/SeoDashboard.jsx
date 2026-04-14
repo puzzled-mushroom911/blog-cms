@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSupabase } from '../hooks/useSupabase';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import StatusBadge from '../components/StatusBadge';
 import {
   ScatterChart,
@@ -66,6 +67,7 @@ function CustomPieLabel({ cx, cy, midAngle, innerRadius, outerRadius, value, nam
 
 export default function SeoDashboard() {
   const supabase = useSupabase();
+  const { workspaceId } = useWorkspace();
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -75,10 +77,12 @@ export default function SeoDashboard() {
 
   async function loadTopics() {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('blog_topics')
       .select('*')
       .order('created_at', { ascending: false });
+    if (workspaceId) query = query.eq('workspace_id', workspaceId);
+    const { data, error } = await query;
 
     if (!error && data) {
       setTopics(data);

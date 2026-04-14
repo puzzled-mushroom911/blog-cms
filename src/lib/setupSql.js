@@ -202,7 +202,8 @@ create policy "Auth users full access" on preferences
 create or replace function query_feedback(
   query_embedding extensions.vector(384),
   match_threshold float default 0.7,
-  match_count int default 10
+  match_count int default 10,
+  ws_id uuid default null
 )
 returns table (
   content text,
@@ -217,13 +218,175 @@ begin
     (1 - (fe.embedding <=> query_embedding))::float as similarity
   from feedback_embeddings fe
   where 1 - (fe.embedding <=> query_embedding) > match_threshold
+    and (ws_id is null or fe.workspace_id = ws_id)
   order by fe.embedding <=> query_embedding
   limit match_count;
 end;
 $$;
+
+-- =============================================================
+-- Phase 3: Multi-Tenant Workspaces
+-- Adds: workspaces, workspace_members, api_keys tables
+-- Adds: workspace_id to all content tables
+-- Updates: RLS policies for workspace scoping
+-- =============================================================
+
+-- Workspaces
+create table if not exists workspaces (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  slug text unique not null,
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  settings jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_workspaces_owner on workspaces(owner_id);
+create index if not exists idx_workspaces_slug on workspaces(slug);
+
+-- Workspace Members
+create table if not exists workspace_members (
+  id uuid default gen_random_uuid() primary key,
+  workspace_id uuid not null references workspaces(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null default 'editor' check (role in ('owner', 'editor', 'viewer')),
+  created_at timestamptz default now(),
+  unique (workspace_id, user_id)
+);
+
+create index if not exists idx_workspace_members_user on workspace_members(user_id);
+create index if not exists idx_workspace_members_workspace on workspace_members(workspace_id);
+
+-- API Keys
+create table if not exists api_keys (
+  id uuid default gen_random_uuid() primary key,
+  workspace_id uuid not null references workspaces(id) on delete cascade,
+  key_hash text not null,
+  key_prefix text not null,
+  name text not null default 'Untitled key',
+  last_used_at timestamptz,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_api_keys_workspace on api_keys(workspace_id);
+create index if not exists idx_api_keys_hash on api_keys(key_hash);
+
+-- Add workspace_id to existing content tables
+alter table blog_posts add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
+alter table blog_topics add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
+alter table seo_pages add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
+alter table feedback add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
+alter table feedback_embeddings add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
+alter table preferences add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
+
+create index if not exists idx_blog_posts_workspace on blog_posts(workspace_id);
+create index if not exists idx_blog_topics_workspace on blog_topics(workspace_id);
+create index if not exists idx_seo_pages_workspace on seo_pages(workspace_id);
+create index if not exists idx_feedback_workspace on feedback(workspace_id);
+create index if not exists idx_feedback_embeddings_workspace on feedback_embeddings(workspace_id);
+create index if not exists idx_preferences_workspace on preferences(workspace_id);
+
+-- RLS for new tables
+alter table workspaces enable row level security;
+alter table workspace_members enable row level security;
+alter table api_keys enable row level security;
+
+-- Helper function for workspace membership check
+create or replace function is_workspace_member(ws_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    select 1 from workspace_members
+    where workspace_id = ws_id and user_id = auth.uid()
+  );
+$$;
+
+-- Workspaces policies
+do $$ begin
+  drop policy if exists "Members can view workspace" on workspaces;
+  drop policy if exists "Owner can update workspace" on workspaces;
+  drop policy if exists "Authenticated can create workspace" on workspaces;
+exception when others then null;
+end $$;
+
+create policy "Members can view workspace" on workspaces
+  for select using (
+    id in (select workspace_id from workspace_members where user_id = auth.uid())
+  );
+create policy "Owner can update workspace" on workspaces
+  for update using (owner_id = auth.uid());
+create policy "Authenticated can create workspace" on workspaces
+  for insert with check (auth.role() = 'authenticated');
+
+-- Workspace Members policies
+do $$ begin
+  drop policy if exists "Members can view members" on workspace_members;
+  drop policy if exists "Owner can manage members" on workspace_members;
+exception when others then null;
+end $$;
+
+create policy "Members can view members" on workspace_members
+  for select using (
+    workspace_id in (select workspace_id from workspace_members wm where wm.user_id = auth.uid())
+  );
+create policy "Owner can manage members" on workspace_members
+  for all using (
+    workspace_id in (select id from workspaces where owner_id = auth.uid())
+  );
+
+-- API Keys policies
+do $$ begin
+  drop policy if exists "Members can view keys" on api_keys;
+  drop policy if exists "Members can manage keys" on api_keys;
+exception when others then null;
+end $$;
+
+create policy "Members can view keys" on api_keys
+  for select using (
+    workspace_id in (select workspace_id from workspace_members where user_id = auth.uid())
+  );
+create policy "Members can manage keys" on api_keys
+  for all using (
+    workspace_id in (select workspace_id from workspace_members where user_id = auth.uid())
+  );
+
+-- Update content table RLS to scope by workspace
+do $$ begin
+  drop policy if exists "Auth users full access" on blog_posts;
+  drop policy if exists "Public read published" on blog_posts;
+  drop policy if exists "Auth users full access" on blog_topics;
+  drop policy if exists "Auth users full access" on seo_pages;
+  drop policy if exists "Auth users full access" on feedback;
+  drop policy if exists "Auth users full access" on feedback_embeddings;
+  drop policy if exists "Auth users full access" on preferences;
+exception when others then null;
+end $$;
+
+create policy "Workspace members full access" on blog_posts
+  for all using (is_workspace_member(workspace_id));
+create policy "Public read published posts" on blog_posts
+  for select using (status = 'published');
+
+create policy "Workspace members full access" on blog_topics
+  for all using (is_workspace_member(workspace_id));
+
+create policy "Workspace members full access" on seo_pages
+  for all using (is_workspace_member(workspace_id));
+
+create policy "Workspace members full access" on feedback
+  for all using (is_workspace_member(workspace_id));
+
+create policy "Workspace members full access" on feedback_embeddings
+  for all using (is_workspace_member(workspace_id));
+
+create policy "Workspace members full access" on preferences
+  for all using (is_workspace_member(workspace_id));
 `.trim();
 
 /**
  * List of tables the CMS requires. Used to verify setup completed.
  */
-export const REQUIRED_TABLES = ['blog_posts', 'blog_topics', 'seo_pages', 'feedback', 'feedback_embeddings', 'preferences'];
+export const REQUIRED_TABLES = ['blog_posts', 'blog_topics', 'seo_pages', 'feedback', 'feedback_embeddings', 'preferences', 'workspaces', 'workspace_members', 'api_keys'];

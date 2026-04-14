@@ -7,6 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Connect from './pages/Connect';
 import Setup from './pages/Setup';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
+import CreateWorkspace from './pages/CreateWorkspace';
 import Dashboard from './pages/Dashboard';
 import PostEditor from './pages/PostEditor';
 import Topics from './pages/Topics';
@@ -20,7 +22,7 @@ import SeoDashboard from './pages/SeoDashboard';
 
 export default function App() {
   const { loading } = useAuth();
-  const { connected } = useConnection();
+  const { connected, isHostedMode } = useConnection();
 
   if (loading && connected) {
     return (
@@ -30,13 +32,20 @@ export default function App() {
     );
   }
 
+  // Where to send unauthenticated users
+  const authRedirect = isHostedMode ? '/signup' : '/connect';
+
   return (
     <>
       <Routes>
-        {/* Connection flow */}
+        {/* Hosted mode: signup + workspace creation */}
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/create-workspace" element={<CreateWorkspace />} />
+
+        {/* Self-host mode: connect → setup → login */}
         <Route path="/connect" element={<Connect />} />
         <Route path="/setup" element={connected ? <Setup /> : <Navigate to="/connect" replace />} />
-        <Route path="/login" element={connected ? <Login /> : <Navigate to="/connect" replace />} />
+        <Route path="/login" element={connected ? <Login /> : <Navigate to={authRedirect} replace />} />
 
         {/* App routes — require connection + auth */}
         <Route
@@ -60,7 +69,7 @@ export default function App() {
 
         {/* Fallback */}
         <Route path="*" element={
-          connected ? <Navigate to="/" replace /> : <Navigate to="/connect" replace />
+          connected ? <Navigate to="/" replace /> : <Navigate to={authRedirect} replace />
         } />
       </Routes>
       <Toaster richColors position="bottom-right" />

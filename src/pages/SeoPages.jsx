@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchSeoPages } from '../lib/seoPages';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import SeoPageCard from '../components/SeoPageCard';
 import { getConfig } from '../config';
 import { Search, Filter, Globe, Loader2 } from 'lucide-react';
@@ -15,6 +16,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function SeoPages() {
+  const { workspaceId } = useWorkspace();
   const { pageTypes } = getConfig();
   const typeFilters = [
     { value: 'all', label: 'All Types' },
@@ -39,7 +41,7 @@ export default function SeoPages() {
         status: statusFilter === 'all' ? undefined : statusFilter,
         page_type: typeFilter === 'all' ? undefined : typeFilter,
         search: search || undefined,
-      });
+      }, 'created_at', false, workspaceId);
       setPages(data);
     } catch (err) {
       setError(err.message);

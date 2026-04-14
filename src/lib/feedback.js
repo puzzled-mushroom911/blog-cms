@@ -185,7 +185,7 @@ export function diffBlocks(originalContent, currentContent, postTitle, editorNot
  * @param {Array} editorNotes - Array of editor note objects
  * @returns {Promise<Array>} Array of inserted feedback row IDs
  */
-export async function captureFeedback(supabase, postId, originalContent, currentContent, postTitle, editorNotes) {
+export async function captureFeedback(supabase, postId, originalContent, currentContent, postTitle, editorNotes, workspaceId = null) {
   const entries = diffBlocks(originalContent, currentContent, postTitle, editorNotes);
   if (entries.length === 0) return [];
 
@@ -215,6 +215,7 @@ export async function captureFeedback(supabase, postId, originalContent, current
   // Batch insert
   const rows = newEntries.map((entry) => ({
     post_id: postId,
+    ...(workspaceId ? { workspace_id: workspaceId } : {}),
     ...entry,
   }));
 

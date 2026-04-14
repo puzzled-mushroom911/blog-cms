@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchSeoPageById, updateSeoPage, deleteSeoPage, approveSeoPage } from '../lib/seoPages';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import { toast } from 'sonner';
 import ContentRenderer from '../components/ContentRenderer';
 import StatusBadge from '../components/StatusBadge';
@@ -23,6 +24,7 @@ const STATUS_OPTIONS = ['draft', 'needs-review', 'published'];
 
 export default function SeoPageEditor() {
   const { pageTypes } = getConfig();
+  const { workspaceId } = useWorkspace();
   const { id } = useParams();
   const navigate = useNavigate();
   const [page, setPage] = useState(null);
@@ -39,7 +41,7 @@ export default function SeoPageEditor() {
   async function loadPage() {
     setLoading(true);
     try {
-      const data = await fetchSeoPageById(id);
+      const data = await fetchSeoPageById(id, workspaceId);
       setPage(data);
     } catch (err) {
       setError(err.message);

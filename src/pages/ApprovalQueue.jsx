@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchApprovalQueue, batchApproveSeoPages, updateSeoPage } from '../lib/seoPages';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import { toast } from 'sonner';
 import StatusBadge from '../components/StatusBadge';
 import { CheckCircle, XCircle, Clock, Loader2, Inbox, ChevronDown, ChevronRight } from 'lucide-react';
@@ -45,6 +46,7 @@ function isToday(dateStr) {
 }
 
 export default function ApprovalQueue() {
+  const { workspaceId } = useWorkspace();
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(new Set());
@@ -58,7 +60,7 @@ export default function ApprovalQueue() {
   async function loadQueue() {
     setLoading(true);
     try {
-      const data = await fetchApprovalQueue();
+      const data = await fetchApprovalQueue(workspaceId);
       setPages(data);
     } catch (err) {
       console.error(err);

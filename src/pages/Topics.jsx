@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSupabase } from '../hooks/useSupabase';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import {
   Lightbulb,
   ThumbsUp,
@@ -33,6 +34,7 @@ const SORT_OPTIONS = [
 
 export default function Topics() {
   const supabase = useSupabase();
+  const { workspaceId } = useWorkspace();
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -46,10 +48,12 @@ export default function Topics() {
 
   async function loadTopics() {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('blog_topics')
       .select('*')
       .order('created_at', { ascending: false });
+    if (workspaceId) query = query.eq('workspace_id', workspaceId);
+    const { data, error } = await query;
 
     if (!error && data) {
       setTopics(data);

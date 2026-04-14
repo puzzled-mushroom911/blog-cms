@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchCalendarItems } from '../lib/seoPages';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import CalendarGrid from '../components/CalendarGrid';
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ const MONTH_NAMES = [
 ];
 
 export default function Calendar() {
+  const { workspaceId } = useWorkspace();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -23,7 +25,7 @@ export default function Calendar() {
   async function loadItems() {
     setLoading(true);
     try {
-      const data = await fetchCalendarItems(year, month);
+      const data = await fetchCalendarItems(year, month, workspaceId);
       setItems(data);
     } catch (err) {
       console.error(err);
