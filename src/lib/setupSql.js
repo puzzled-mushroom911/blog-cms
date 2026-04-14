@@ -139,6 +139,12 @@ create extension if not exists vector with schema extensions;
 -- Add original_content to blog_posts
 alter table blog_posts add column if not exists original_content jsonb default null;
 
+-- Sources & AI reasoning (editorial transparency — CMS-only, not rendered on public site)
+-- sources: [{url, title, type, note}] where type is "reddit", "youtube", "government", "news", "data", etc.
+-- ai_reasoning: markdown explaining how the AI researched and structured the content
+alter table blog_posts add column if not exists sources jsonb default '[]'::jsonb;
+alter table blog_posts add column if not exists ai_reasoning text default '';
+
 -- Feedback table — stores edit diffs
 create table if not exists feedback (
   id uuid default gen_random_uuid() primary key,

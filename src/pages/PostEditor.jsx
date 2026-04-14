@@ -115,6 +115,8 @@ export default function PostEditor() {
         meta_description: post.meta_description,
         keywords: post.keywords,
         content: post.content,
+        sources: post.sources,
+        ai_reasoning: post.ai_reasoning,
         status: 'published',
         updated_at: new Date().toISOString(),
       })
@@ -156,6 +158,8 @@ export default function PostEditor() {
         meta_description: post.meta_description,
         keywords: post.keywords,
         content: post.content,
+        sources: post.sources,
+        ai_reasoning: post.ai_reasoning,
         status: post.status,
         updated_at: new Date().toISOString(),
       })
