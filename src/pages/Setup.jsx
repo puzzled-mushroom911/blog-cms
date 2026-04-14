@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { trackInstall } from '../lib/tracking';
 
 export default function Setup() {
   const { supabase, connected, disconnect } = useConnection();
@@ -66,6 +67,10 @@ export default function Setup() {
     if (error) {
       toast.error(error.message);
     } else {
+      // Track BYO install (fire-and-forget)
+      const conn = JSON.parse(localStorage.getItem('blog-cms-connection') || '{}');
+      if (conn.url) trackInstall(conn.url);
+
       toast.success('Account created! You can now sign in.');
       navigate('/login');
     }
@@ -207,7 +212,7 @@ export default function Setup() {
 
         <div className="text-center mt-6">
           <button
-            onClick={() => { disconnect(); navigate('/connect'); }}
+            onClick={() => { disconnect(); navigate('/welcome'); }}
             className="text-xs text-slate-400 hover:text-slate-600"
           >
             Disconnect and use a different Supabase project
