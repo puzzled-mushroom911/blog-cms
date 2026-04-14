@@ -17,8 +17,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // If already signed in, go to workspace creation
-  if (user) return <Navigate to="/create-workspace" replace />;
+  // If already signed in, go to dashboard (workspace auto-created)
+  if (user) return <Navigate to="/" replace />;
   // If not hosted mode, use self-host flow
   if (!isHostedMode) return <Navigate to="/connect" replace />;
 
@@ -34,7 +34,7 @@ export default function Signup() {
       setError(authError.message);
     } else {
       toast.success('Account created!');
-      navigate('/create-workspace');
+      navigate('/');
     }
   }
 
