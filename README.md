@@ -50,7 +50,7 @@ No cloning, no installs. Use the hosted CMS at **[cms.moonify.ai](https://cms.mo
 <a name="getting-started-hosted"></a>
 
 1. **Create a free Supabase project** at [supabase.com](https://supabase.com/)
-2. **Run the database migrations** -- In your Supabase dashboard, go to SQL Editor and run each file from `supabase/migrations/` in order (copy from [the migrations folder](https://github.com/puzzled-mushroom911/blog-cms/tree/main/supabase/migrations))
+2. **Run the database schema** -- In your Supabase SQL Editor, paste and run [`supabase/schema.sql`](https://github.com/puzzled-mushroom911/blog-cms/blob/main/supabase/schema.sql)
 3. **Create a CMS user** -- In Supabase > Authentication > Users, click "Add user", enter your email/password, check "Auto Confirm User"
 4. **Connect** -- Go to [cms.moonify.ai](https://cms.moonify.ai), paste your Supabase Project URL and anon key, and sign in
 5. **Start generating content** -- Install [Claude Code](https://claude.ai/download) and use the prompts in the `prompts/` folder to generate blog posts from your YouTube transcripts
@@ -89,26 +89,16 @@ npm install
 3. Give it a name (e.g., "blog-cms") and set a database password
 4. Wait for it to finish setting up (~1 minute)
 
-### 4. Run the database migrations
+### 4. Run the database schema
 
-Run **all** migration files in order. Each one adds tables the CMS needs:
+One file creates everything the CMS needs -- tables, RLS policies, functions, and triggers:
 
 1. In your Supabase dashboard, go to **SQL Editor**
 2. Click **New query**
-3. Copy and paste the contents of each file below, one at a time, and click **Run**:
+3. Copy and paste the entire contents of [`supabase/schema.sql`](supabase/schema.sql)
+4. Click **Run** -- it should return "Success. No rows returned."
 
-| File | What it creates |
-|------|----------------|
-| `001_blog_posts.sql` | Blog posts table + RLS policies |
-| `002_blog_topics.sql` | Content pipeline / topic research |
-| `003_editor_notes.sql` | Inline editorial comments |
-| `004_seo_pages.sql` | Programmatic SEO pages |
-| `005_seo_workflow.sql` | SEO workflow tracking |
-| `006_flexible_page_types.sql` | Custom page type support |
-| `007_pipeline_stages.sql` | Two-gate content pipeline stages |
-| `008_feedback_loop.sql` | Feedback system + vector embeddings |
-
-All files are in `supabase/migrations/`. Run them in numbered order -- each should return "Success. No rows returned."
+That single file creates 12 tables: profiles, workspaces, workspace_members, blog_posts, blog_post_relations, blog_topics, seo_pages, editorial_research, cms_block_comments, feedback, feedback_embeddings, preferences, and api_keys.
 
 ### 5. Create your CMS user
 
@@ -282,14 +272,7 @@ blog-cms/
 ├── .env.example                 # Environment variables template
 ├── index.html                   # HTML entry point
 ├── supabase/
-│   └── migrations/
-│       ├── 001_blog_posts.sql   # Blog posts table
-│       ├── 002_blog_topics.sql  # Topic research pipeline
-│       ├── 003_editor_notes.sql # Inline editorial comments
-│       ├── 004_seo_pages.sql    # Programmatic SEO pages
-│       ├── 005_seo_workflow.sql # SEO workflow tracking
-│       ├── 006_flexible_page_types.sql  # Custom page types
-│       └── 007_pipeline_stages.sql      # Pipeline stage config
+│   └── schema.sql               # Complete database setup (run once in Supabase SQL Editor)
 ├── prompts/
 │   ├── generate-blog-post.md    # Prompt: transcript to blog post
 │   ├── seo-review.md            # Prompt: SEO audit before publishing
