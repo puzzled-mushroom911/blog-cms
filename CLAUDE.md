@@ -5,13 +5,12 @@
 This is a lightweight CMS for managing AI-generated blog posts. Built with React 19, Vite, Tailwind CSS 4, and Supabase.
 
 - **Directory:** `~/blog-cms/`
-- **Supabase project ID:** `wosfsgadatfgfboxzogo` (use this with Supabase MCP tools)
-- **Supabase URL:** `https://wosfsgadatfgfboxzogo.supabase.co`
+- **Supabase project ID:** (your project ref — find it in your Supabase URL: `https://<project-id>.supabase.co`)
 - **Dev server:** `cd ~/blog-cms && npm run dev`
 
 ## "CMS" as Context Keyword
 
-When the user references **"CMS"** in conversation, it means this blog CMS and its Supabase tables. Use Supabase MCP with project_id `wosfsgadatfgfboxzogo` — no need to look it up.
+When the user references **"CMS"** in conversation, it means this blog CMS and its Supabase tables. Use Supabase MCP to read/write data. Get the project ID from `.env` (`VITE_SUPABASE_URL` contains it).
 
 ## Tables
 
@@ -126,31 +125,44 @@ When the user says they made changes in the CMS:
 
 When the user asks you to fix/resolve editor comments on a post:
 
-1. Query the post: `SELECT id, title, content, editor_notes, status FROM blog_posts WHERE slug = '<slug>'`
-2. Filter `editor_notes` for entries where `resolved = false`
-3. Each note includes `blockType`, `nearestHeading`, and `textPreview` — use these to understand what the comment refers to without counting through blocks
-4. For each unresolved comment:
-   - Read the comment `.text` to understand what needs to change
-   - Locate the block at `.blockIndex` in the `content` array
-   - Apply the fix to the content JSONB
-5. Mark each resolved comment: set `resolved = true` and `resolvedAt = <now>`
-6. UPDATE the post with the modified `content` and `editor_notes`
-7. Set status based on outcome:
-   - All comments resolved → set status to `'published'` (unless the user says otherwise)
-   - Some comments need user input → keep status as `'needs-review'` and report which ones
-
-**Shortcut query** — get comments with context in one shot:
+1. **Fetch the post with comments and content in one query:**
 
 ```sql
-SELECT
-  slug, title, status,
-  jsonb_array_elements(editor_notes) as note
+SELECT id, title, slug, status, editor_notes, content
 FROM blog_posts
-WHERE slug = '<slug>'
+WHERE title ILIKE '%<search term>%'
+  AND editor_notes IS NOT NULL
   AND editor_notes != '[]'::jsonb;
 ```
 
-Then filter in your logic for notes where `resolved = false`.
+2. **Identify unresolved comments:** Filter `editor_notes` for entries where `resolved = false`. Each note has a `blockIndex` (integer) pointing to a position in the `content` array.
+
+3. **Map each comment to its content block:** Editor notes only store `blockIndex` — they do NOT include block type, heading context, or text previews. You must use the `content` array to look up what each `blockIndex` refers to. Count from 0. For long posts, present a summary to the user before making changes:
+   - "Comment on block 21 (table under 'Flood Insurance' heading): ..."
+   - "Comment on block 51 (paragraph under 'Sinkhole Coverage' heading): ..."
+
+4. **For each unresolved comment:**
+   - Read the comment `.text` to understand what needs to change
+   - Locate the block at `content[blockIndex]`
+   - Apply the fix using `jsonb_set(content, '{<blockIndex>,<field>}', '<new value>')`
+   - If the comment says to leave something alone or asks a question you can't answer, report it back to the user instead of guessing
+
+5. **Mark all addressed comments as resolved** using a single update:
+
+```sql
+UPDATE blog_posts
+SET
+  content = jsonb_set(jsonb_set(content, ...), ...),  -- chain fixes
+  editor_notes = (
+    SELECT jsonb_agg(elem || '{"resolved": true}'::jsonb)
+    FROM jsonb_array_elements(editor_notes) AS elem
+  )
+WHERE id = '<post_id>';
+```
+
+6. **Set status based on outcome:**
+   - All comments resolved → set status to `'published'` (unless the user says otherwise)
+   - Some comments need user input → keep status as `'needs-review'` and report which ones
 
 ## Status Transitions
 
