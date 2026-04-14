@@ -5,12 +5,13 @@
 This is a lightweight CMS for managing AI-generated blog posts. Built with React 19, Vite, Tailwind CSS 4, and Supabase.
 
 - **Directory:** `~/blog-cms/`
-- **Supabase project:** Uses the same Supabase instance as the main website
+- **Supabase project ID:** `wosfsgadatfgfboxzogo` (use this with Supabase MCP tools)
+- **Supabase URL:** `https://wosfsgadatfgfboxzogo.supabase.co`
 - **Dev server:** `cd ~/blog-cms && npm run dev`
 
 ## "CMS" as Context Keyword
 
-When the user references **"CMS"** in conversation, it means this blog CMS and its Supabase tables. Use Supabase MCP to read/write data.
+When the user references **"CMS"** in conversation, it means this blog CMS and its Supabase tables. Use Supabase MCP with project_id `wosfsgadatfgfboxzogo` — no need to look it up.
 
 ## Tables
 
@@ -32,8 +33,8 @@ When the user references **"CMS"** in conversation, it means this blog CMS and i
 | meta_description | text | SEO meta description |
 | keywords | text | SEO keywords |
 | content | JSONB | Array of content blocks (paragraph, heading, list, callout, quote, image, table, stat-cards, pros-cons, info-box, process-steps) |
-| status | text | draft, needs-review, published |
-| editor_notes | JSONB | Array of {blockIndex, text, author, createdAt, resolved} — inline comments on content blocks |
+| status | text | draft, needs-review, published (see Status Transitions below) |
+| editor_notes | JSONB | Array of {blockIndex, text, author, createdAt, resolved} — inline comments on content blocks (see Resolving Editor Comments workflow) |
 | created_at | timestamptz | Auto-set |
 | updated_at | timestamptz | Auto-set |
 
@@ -120,6 +121,48 @@ When the user says they made changes in the CMS:
 1. Query `blog_topics` ordered by `updated_at DESC` (limit 10) to see recent changes
 2. Also check `blog_posts` if the user mentions blog changes
 3. Report what changed (status updates, new notes, etc.)
+
+### Resolving editor comments → "correct the blog post based on my comments"
+
+When the user asks you to fix/resolve editor comments on a post:
+
+1. Query the post: `SELECT id, title, content, editor_notes, status FROM blog_posts WHERE slug = '<slug>'`
+2. Filter `editor_notes` for entries where `resolved = false`
+3. Each note includes `blockType`, `nearestHeading`, and `textPreview` — use these to understand what the comment refers to without counting through blocks
+4. For each unresolved comment:
+   - Read the comment `.text` to understand what needs to change
+   - Locate the block at `.blockIndex` in the `content` array
+   - Apply the fix to the content JSONB
+5. Mark each resolved comment: set `resolved = true` and `resolvedAt = <now>`
+6. UPDATE the post with the modified `content` and `editor_notes`
+7. Set status based on outcome:
+   - All comments resolved → set status to `'published'` (unless the user says otherwise)
+   - Some comments need user input → keep status as `'needs-review'` and report which ones
+
+**Shortcut query** — get comments with context in one shot:
+
+```sql
+SELECT
+  slug, title, status,
+  jsonb_array_elements(editor_notes) as note
+FROM blog_posts
+WHERE slug = '<slug>'
+  AND editor_notes != '[]'::jsonb;
+```
+
+Then filter in your logic for notes where `resolved = false`.
+
+## Status Transitions
+
+| From | To | Trigger |
+|------|----|---------|
+| `draft` | `needs-review` | AI finishes writing, post is ready for human review |
+| `needs-review` | `published` | User approves in CMS, or all editor comments resolved |
+| `needs-review` | `draft` | User decides post needs major rework |
+| `published` | `needs-review` | User adds new editor comments to a live post |
+| `published` | `draft` | User unpublishes a post |
+
+When resolving comments, default to `published` unless the user explicitly says to keep it in review.
 
 ### Feedback loop — learning from user edits
 

@@ -398,5 +398,72 @@ create policy "Members can manage keys" on public.api_keys
   ));
 
 -- ============================================================
+-- 13. Helper: get editor comments with block context
+-- ============================================================
+
+-- Returns unresolved editor comments with block type, nearest heading,
+-- and text preview so you don't have to count through content blocks.
+-- Usage: SELECT * FROM get_comments_with_context('<post_id>');
+
+create or replace function public.get_comments_with_context(target_post_id uuid)
+returns table (
+  block_index int,
+  block_type text,
+  nearest_heading text,
+  text_preview text,
+  comment_text text,
+  author text,
+  created_at text,
+  resolved boolean
+) language plpgsql stable as $$
+declare
+  post_content jsonb;
+  notes jsonb;
+  note jsonb;
+  block jsonb;
+  heading text := '';
+  preview text;
+begin
+  select bp.content, bp.editor_notes into post_content, notes
+  from blog_posts bp where bp.id = target_post_id;
+
+  if notes is null or jsonb_array_length(notes) = 0 then
+    return;
+  end if;
+
+  for note in select * from jsonb_array_elements(notes)
+  loop
+    block_index := (note->>'blockIndex')::int;
+
+    if block_index < jsonb_array_length(post_content) then
+      block := post_content->block_index;
+      block_type := block->>'type';
+      preview := left(coalesce(block->>'text', block->>'title', ''), 80);
+    else
+      block_type := 'unknown';
+      preview := '';
+    end if;
+
+    heading := '';
+    for i in reverse block_index..0 loop
+      if post_content->i->>'type' in ('heading', 'subheading') then
+        heading := post_content->i->>'text';
+        exit;
+      end if;
+    end loop;
+
+    nearest_heading := heading;
+    text_preview := preview;
+    comment_text := note->>'text';
+    author := note->>'author';
+    created_at := note->>'createdAt';
+    resolved := coalesce((note->>'resolved')::boolean, false);
+
+    return next;
+  end loop;
+end;
+$$;
+
+-- ============================================================
 -- Done! Your CMS database is ready.
 -- ============================================================
