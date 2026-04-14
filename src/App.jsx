@@ -4,6 +4,7 @@ import { useConnection } from './contexts/ConnectionContext';
 import { Toaster } from "@/components/ui/sonner";
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import Welcome from './pages/Welcome';
 import Connect from './pages/Connect';
 import Setup from './pages/Setup';
 import Login from './pages/Login';
@@ -23,7 +24,7 @@ import Docs from './pages/Docs';
 
 export default function App() {
   const { loading } = useAuth();
-  const { connected, isHostedMode } = useConnection();
+  const { connected } = useConnection();
 
   if (loading && connected) {
     return (
@@ -33,29 +34,17 @@ export default function App() {
     );
   }
 
-  // Where to send unauthenticated users
-  const authRedirect = isHostedMode ? '/signup' : '/connect';
-
   return (
     <>
       <Routes>
-        {/* Hosted mode: signup + workspace creation */}
+        <Route path="/welcome" element={<Welcome />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/create-workspace" element={<CreateWorkspace />} />
-
-        {/* Self-host mode: connect → setup → login */}
+        <Route path="/login" element={<Login />} />
         <Route path="/connect" element={<Connect />} />
         <Route path="/setup" element={connected ? <Setup /> : <Navigate to="/connect" replace />} />
-        <Route path="/login" element={connected ? <Login /> : <Navigate to={authRedirect} replace />} />
+        <Route path="/create-workspace" element={<CreateWorkspace />} />
 
-        {/* App routes — require connection + auth */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="posts/:id" element={<PostEditor />} />
           <Route path="topics" element={<Topics />} />
@@ -69,9 +58,8 @@ export default function App() {
           <Route path="docs" element={<Docs />} />
         </Route>
 
-        {/* Fallback */}
         <Route path="*" element={
-          connected ? <Navigate to="/" replace /> : <Navigate to={authRedirect} replace />
+          connected ? <Navigate to="/" replace /> : <Navigate to="/welcome" replace />
         } />
       </Routes>
       <Toaster richColors position="bottom-right" />

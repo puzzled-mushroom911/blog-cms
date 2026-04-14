@@ -4,14 +4,13 @@ import { useConnection } from '../contexts/ConnectionContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 
 export default function ProtectedRoute({ children }) {
-  const { connected, isHostedMode } = useConnection();
+  const { connected } = useConnection();
   const { user } = useAuth();
   const { workspace, loading: wsLoading } = useWorkspace();
 
-  if (!connected) return <Navigate to={isHostedMode ? '/signup' : '/connect'} replace />;
-  if (!user) return <Navigate to={isHostedMode ? '/signup' : '/login'} replace />;
+  if (!connected) return <Navigate to="/welcome" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
-  // Wait for workspace to load
   if (wsLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -20,7 +19,6 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  // If user has no workspace yet, send to create one
   if (!workspace) return <Navigate to="/create-workspace" replace />;
 
   return children;

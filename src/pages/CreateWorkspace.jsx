@@ -20,7 +20,7 @@ function slugify(text) {
 
 export default function CreateWorkspace() {
   const { user } = useAuth();
-  const { supabase, isHostedMode } = useConnection();
+  const { supabase } = useConnection();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -29,7 +29,7 @@ export default function CreateWorkspace() {
   const [error, setError] = useState('');
 
   if (!user) {
-    return <Navigate to={isHostedMode ? '/signup' : '/login'} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   function handleNameChange(value) {

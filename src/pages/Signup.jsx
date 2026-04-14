@@ -10,22 +10,23 @@ import { Label } from '@/components/ui/label';
 
 export default function Signup() {
   const { user, signUp } = useAuth();
-  const { isHostedMode } = useConnection();
+  const { connectHosted, hasHostedCredentials } = useConnection();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // If already signed in, go to dashboard (workspace auto-created)
   if (user) return <Navigate to="/" replace />;
-  // If not hosted mode, use self-host flow
-  if (!isHostedMode) return <Navigate to="/connect" replace />;
+  if (!hasHostedCredentials) return <Navigate to="/connect" replace />;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    connectHosted();
+    await new Promise(r => setTimeout(r, 100));
 
     const { error: authError } = await signUp(email.trim(), password);
     setLoading(false);
@@ -42,43 +43,19 @@ export default function Signup() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img
-            src="https://moonify.ai/moonify-logo.svg"
-            alt="Moonify"
-            className="h-10 mx-auto mb-4"
-          />
+          <img src="https://moonify.ai/moonify-logo.svg" alt="Moonify" className="h-10 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
-          <p className="text-sm text-slate-500 mt-2">
-            Get started with your AI-powered blog CMS
-          </p>
+          <p className="text-sm text-slate-500 mt-2">Get started with your AI-powered blog CMS</p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
           <div>
             <Label className="text-sm text-slate-700 mb-1.5">Email</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoFocus
-              placeholder="you@example.com"
-            />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus placeholder="you@example.com" />
           </div>
-
           <div>
             <Label className="text-sm text-slate-700 mb-1.5">Password</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="At least 6 characters"
-              minLength={6}
-            />
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="At least 6 characters" minLength={6} />
           </div>
 
           {error && (
@@ -89,19 +66,13 @@ export default function Signup() {
           )}
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</>
-            ) : (
-              <><ArrowRight className="w-4 h-4" /> Sign up</>
-            )}
+            {loading ? (<><Loader2 className="w-4 h-4 animate-spin" /> Creating account...</>) : (<><ArrowRight className="w-4 h-4" /> Sign up</>)}
           </Button>
         </form>
 
         <p className="text-xs text-slate-400 text-center mt-4">
           Already have an account?{' '}
-          <button type="button" onClick={() => navigate('/login')} className="text-blue-600 hover:text-blue-700">
-            Sign in
-          </button>
+          <button type="button" onClick={() => navigate('/login')} className="text-blue-600 hover:text-blue-700">Sign in</button>
         </p>
       </div>
     </div>
