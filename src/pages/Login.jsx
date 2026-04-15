@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getConfig } from '../config';
 
 export default function Login() {
   const { user, signIn } = useAuth();
@@ -17,8 +16,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   if (user) return <Navigate to="/" replace />;
-
-  const config = getConfig();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -42,7 +39,6 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <img src="https://moonify.ai/moonify-logo.svg" alt="Moonify" className="h-12 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-slate-900">{config.cmsTitle}</h1>
           <p className="text-sm text-slate-500 mt-1">Sign in to manage content</p>
         </div>
 
