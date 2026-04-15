@@ -1,7 +1,12 @@
 import { authenticate, sendError } from '../../_lib/auth.js';
 import { getServiceClient } from '../../_lib/supabase.js';
+import { apiLimiter } from '../../_lib/rateLimit.js';
+import { validatePost } from '../../_lib/validate.js';
 
 export default async function handler(req, res) {
+  const { limited } = apiLimiter(req);
+  if (limited) return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+
   const auth = await authenticate(req);
   if (auth.error) return sendError(res, auth.status, auth.error);
 
@@ -40,9 +45,8 @@ async function listPosts(req, res, supabase, workspace_id) {
 
 async function createPost(req, res, supabase, workspace_id) {
   const body = req.body;
-  if (!body || !body.title) {
-    return sendError(res, 400, 'title is required');
-  }
+  const { valid, error: validationError } = validatePost(body);
+  if (!valid) return sendError(res, 400, validationError);
 
   const slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 

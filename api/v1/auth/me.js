@@ -1,7 +1,11 @@
 import { authenticate, sendError } from '../../_lib/auth.js';
 import { getServiceClient } from '../../_lib/supabase.js';
+import { apiLimiter } from '../../_lib/rateLimit.js';
 
 export default async function handler(req, res) {
+  const { limited } = apiLimiter(req);
+  if (limited) return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return sendError(res, 405, 'Method not allowed');

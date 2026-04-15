@@ -324,8 +324,10 @@ export default function Settings() {
           variant="outline"
           size="sm"
           onClick={() => {
-            disconnect();
-            navigate('/connect');
+            if (window.confirm('Disconnect from this database? You will be signed out and redirected to the connection page.')) {
+              disconnect();
+              navigate('/connect');
+            }
           }}
         >
           <Unplug className="w-3.5 h-3.5" />

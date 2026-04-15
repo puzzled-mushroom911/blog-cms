@@ -9,6 +9,14 @@ export const HOSTED_URL = import.meta.env.VITE_SUPABASE_URL || '';
 export const HOSTED_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 export const hasHostedCredentials = !!(HOSTED_URL && HOSTED_ANON_KEY);
 
+// Warn developers if hosted env vars are missing (not an error — BYO mode still works)
+if (!hasHostedCredentials && import.meta.env.DEV) {
+  console.warn(
+    '[blog-cms] VITE_SUPABASE_URL and/or VITE_SUPABASE_ANON_KEY not set in .env. ' +
+    'Hosted signup will be unavailable. Users can still connect their own Supabase.'
+  );
+}
+
 /**
  * Connection mode:
  *  'hosted' — using Moonify's Supabase (env var credentials)

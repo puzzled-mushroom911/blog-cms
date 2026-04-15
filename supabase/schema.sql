@@ -149,15 +149,9 @@ create policy "Public read published posts" on public.blog_posts
 -- Workspace members get full access
 create policy "Workspace members full access" on public.blog_posts
   for all using (is_workspace_member(workspace_id));
--- Authenticated users can insert (for Claude Code / MCP writes)
-create policy "Authenticated users can insert" on public.blog_posts
-  for insert to authenticated with check (true);
--- Authenticated users can read all posts (for CMS dashboard)
-create policy "Authenticated users can read all" on public.blog_posts
-  for select to authenticated using (true);
--- Authenticated users can update (for CMS editor)
-create policy "Authenticated users can update" on public.blog_posts
-  for update to authenticated with check (true);
+-- Workspace members can insert posts (for Claude Code / MCP writes)
+create policy "Workspace members can insert posts" on public.blog_posts
+  for insert to authenticated with check (is_workspace_member(workspace_id));
 
 -- ============================================================
 -- 4. Blog Post Relations (internal linking)
@@ -175,8 +169,10 @@ alter table public.blog_post_relations enable row level security;
 
 create policy "Public can read relations" on public.blog_post_relations
   for select to anon using (true);
-create policy "Authenticated can manage relations" on public.blog_post_relations
-  for all to authenticated using (true) with check (true);
+create policy "Workspace members can manage relations" on public.blog_post_relations
+  for all to authenticated
+  using (from_slug in (select slug from blog_posts where is_workspace_member(workspace_id)))
+  with check (from_slug in (select slug from blog_posts where is_workspace_member(workspace_id)));
 
 -- ============================================================
 -- 5. Blog Topics (content pipeline)
@@ -207,10 +203,10 @@ alter table public.blog_topics enable row level security;
 create trigger blog_topics_updated_at before update on public.blog_topics
   for each row execute function update_updated_at();
 
-create policy "Authenticated users can manage topics" on public.blog_topics
-  for all using (auth.role() = 'authenticated');
 create policy "Workspace members full access" on public.blog_topics
   for all using (is_workspace_member(workspace_id));
+create policy "Workspace members can insert topics" on public.blog_topics
+  for insert to authenticated with check (is_workspace_member(workspace_id));
 
 -- ============================================================
 -- 6. SEO Pages (programmatic pages)
@@ -241,10 +237,10 @@ create trigger seo_pages_updated_at before update on public.seo_pages
 
 create policy "Public can read published seo_pages" on public.seo_pages
   for select using (status = 'published');
-create policy "Authenticated users can manage seo_pages" on public.seo_pages
-  for all using (auth.role() = 'authenticated');
 create policy "Workspace members full access" on public.seo_pages
   for all using (is_workspace_member(workspace_id));
+create policy "Workspace members can insert seo_pages" on public.seo_pages
+  for insert to authenticated with check (is_workspace_member(workspace_id));
 
 -- Add FK from blog_topics after seo_pages exists
 alter table public.blog_topics
@@ -266,13 +262,16 @@ create table public.editorial_research (
   tags            text[] default '{}',
   relevance_score integer default 50,
   used_in_post_id uuid references public.blog_posts on delete set null,
+  workspace_id    uuid references public.workspaces on delete set null,
   created_at      timestamptz default now()
 );
 
 alter table public.editorial_research enable row level security;
 
-create policy "Authenticated users can manage editorial_research" on public.editorial_research
-  for all using (auth.role() = 'authenticated');
+create policy "Workspace members full access" on public.editorial_research
+  for all using (is_workspace_member(workspace_id));
+create policy "Workspace members can insert research" on public.editorial_research
+  for insert to authenticated with check (is_workspace_member(workspace_id));
 
 -- ============================================================
 -- 8. CMS Block Comments (inline editorial comments)
@@ -290,8 +289,10 @@ create table public.cms_block_comments (
 
 alter table public.cms_block_comments enable row level security;
 
-create policy "Authenticated users can manage comments" on public.cms_block_comments
-  for all to authenticated using (true) with check (true);
+create policy "Workspace members can manage comments" on public.cms_block_comments
+  for all to authenticated
+  using (post_id in (select id from blog_posts where is_workspace_member(workspace_id)))
+  with check (post_id in (select id from blog_posts where is_workspace_member(workspace_id)));
 
 -- ============================================================
 -- 9. Feedback (learning from your edits)
@@ -313,8 +314,8 @@ alter table public.feedback enable row level security;
 
 create policy "Workspace members full access" on public.feedback
   for all using (is_workspace_member(workspace_id));
-create policy "Authenticated can insert feedback" on public.feedback
-  for insert to authenticated with check (true);
+create policy "Workspace members can insert feedback" on public.feedback
+  for insert to authenticated with check (is_workspace_member(workspace_id));
 
 -- ============================================================
 -- 10. Feedback Embeddings (vector search for style learning)

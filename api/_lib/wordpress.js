@@ -220,21 +220,47 @@ export async function publishToWordPress({
   if (excerpt) body.excerpt = excerpt;
   if (slug) body.slug = slug;
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${credentials}`,
-    },
-    body: JSON.stringify(body),
-  });
+  // 30-second timeout to prevent hanging on slow/offline WordPress
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${credentials}`,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') {
+      throw new Error('WordPress did not respond within 30 seconds. Check that the site is online and try again.');
+    }
+    throw new Error(`Could not connect to WordPress: ${err.message}`);
+  }
+  clearTimeout(timeout);
 
   if (!response.ok) {
+    // Map status codes to user-friendly messages
+    if (response.status === 401) {
+      throw new Error('WordPress authentication failed. Check your username and application password.');
+    }
+    if (response.status === 403) {
+      throw new Error('WordPress permission denied. Your user may not have permission to create posts.');
+    }
+    if (response.status === 404) {
+      throw new Error('WordPress REST API not found. Check that the site URL is correct and the REST API is enabled.');
+    }
+
     let errorMessage = `WordPress API error: ${response.status} ${response.statusText}`;
     try {
       const errorBody = await response.json();
       if (errorBody.message) {
-        errorMessage = `WordPress API error: ${errorBody.message}`;
+        errorMessage = `WordPress error: ${errorBody.message}`;
       }
     } catch {
       // Couldn't parse error body — use the status-based message

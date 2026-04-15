@@ -3,6 +3,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { authenticate, sendError } from './_lib/auth.js';
 import { getServiceClient } from './_lib/supabase.js';
 import { registerAllTools } from '../lib/mcp-tools.js';
+import { apiLimiter } from './_lib/rateLimit.js';
 import { registerAllPrompts } from '../lib/mcp-prompts.js';
 
 export default async function handler(req, res) {
@@ -10,6 +11,9 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'POST');
     return sendError(res, 405, 'Method not allowed');
   }
+
+  const { limited } = apiLimiter(req);
+  if (limited) return res.status(429).json({ error: 'Too many requests. Please try again later.' });
 
   const auth = await authenticate(req);
   if (auth.error) return sendError(res, auth.status, auth.error);

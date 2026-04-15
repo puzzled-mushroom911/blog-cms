@@ -9,6 +9,8 @@ import Connect from './pages/Connect';
 import Setup from './pages/Setup';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import CreateWorkspace from './pages/CreateWorkspace';
 import Dashboard from './pages/Dashboard';
 import PostEditor from './pages/PostEditor';
@@ -40,6 +42,8 @@ export default function App() {
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/connect" element={<Connect />} />
         <Route path="/setup" element={connected ? <Setup /> : <Navigate to="/connect" replace />} />
         <Route path="/create-workspace" element={<CreateWorkspace />} />

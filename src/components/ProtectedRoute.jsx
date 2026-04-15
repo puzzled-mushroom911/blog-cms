@@ -5,11 +5,11 @@ import { useWorkspace } from '../contexts/WorkspaceContext';
 
 export default function ProtectedRoute({ children }) {
   const { connected } = useConnection();
-  const { user } = useAuth();
+  const { user, sessionExpired } = useAuth();
   const { workspace, loading: wsLoading } = useWorkspace();
 
   if (!connected) return <Navigate to="/welcome" replace />;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user || sessionExpired) return <Navigate to="/login" replace />;
 
   if (wsLoading) {
     return (

@@ -10,6 +10,7 @@
  */
 
 import { useState } from "react";
+import DOMPurify from "dompurify";
 import {
   Plus,
   Heading2,
@@ -702,7 +703,7 @@ function renderBlock(block, i, editable, onInlineEdit, onRemoveBlock, slug) {
         >
           <p
             className="text-slate-700 text-sm leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: block.content || "" }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.content || "") }}
           />
         </div>
       );

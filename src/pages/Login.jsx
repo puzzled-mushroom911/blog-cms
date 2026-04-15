@@ -56,6 +56,11 @@ export default function Login() {
               <Label className="text-sm text-slate-700 mb-1.5">Password</Label>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Your password" />
             </div>
+            <div className="flex justify-end">
+              <button type="button" onClick={() => navigate('/forgot-password')} className="text-xs text-blue-600 hover:text-blue-700">
+                Forgot password?
+              </button>
+            </div>
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>

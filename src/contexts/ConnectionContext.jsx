@@ -20,11 +20,16 @@ export function ConnectionProvider({ children }) {
     setMode('hosted');
   }, []);
 
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async () => {
+    // Sign out from Supabase before clearing connection
+    const client = connected ? getClient() : null;
+    if (client) {
+      try { await client.auth.signOut(); } catch {}
+    }
     clearConnection();
     setConnected(false);
     setMode(null);
-  }, []);
+  }, [connected]);
 
   const supabase = connected ? getClient() : null;
 
