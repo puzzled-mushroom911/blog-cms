@@ -24,7 +24,7 @@ const NAV_ITEMS = [
   { to: '/seo-pages', label: 'SEO Pages', icon: Globe },
   { to: '/approval', label: 'HITL Queue', icon: Inbox },
   { to: '/calendar', label: 'Calendar', icon: CalendarDays },
-  { to: '/docs', label: 'API Docs', icon: BookOpen },
+  { to: '/docs', label: 'Docs', icon: BookOpen },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
