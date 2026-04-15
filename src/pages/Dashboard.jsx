@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSupabase } from '../hooks/useSupabase';
 import { useWorkspace } from '../contexts/WorkspaceContext';
-import { FileText, Eye, PenTool, AlertCircle, Search, CalendarClock } from 'lucide-react';
+import { FileText, Eye, PenTool, AlertCircle, Search, CalendarClock, ArrowRight, CheckCircle, BookOpen, Settings, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PostCard from '../components/PostCard';
+import { getConfig } from '../config';
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'All' },

@@ -24,10 +24,14 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-// Fetch published posts
+// Your workspace ID (find it in CMS Settings or the workspaces table)
+const WORKSPACE_ID = process.env.WORKSPACE_ID
+
+// Fetch published posts (scoped to your workspace)
 const { data: posts } = await supabase
   .from('blog_posts')
   .select('slug, title, excerpt, date, read_time, category, tags, image')
+  .eq('workspace_id', WORKSPACE_ID)
   .eq('status', 'published')
   .order('date', { ascending: false })
   .limit(20)
@@ -36,6 +40,7 @@ const { data: posts } = await supabase
 const { data: post } = await supabase
   .from('blog_posts')
   .select('*')
+  .eq('workspace_id', WORKSPACE_ID)
   .eq('slug', 'your-post-slug')
   .eq('status', 'published')
   .single()`;

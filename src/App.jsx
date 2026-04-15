@@ -12,7 +12,7 @@ import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import CreateWorkspace from './pages/CreateWorkspace';
-import Dashboard from './pages/Dashboard';
+import Content from './pages/Content';
 import PostEditor from './pages/PostEditor';
 import Topics from './pages/Topics';
 import TopicDetail from './pages/TopicDetail';
@@ -21,7 +21,7 @@ import SeoPages from './pages/SeoPages';
 import SeoPageEditor from './pages/SeoPageEditor';
 import ApprovalQueue from './pages/ApprovalQueue';
 import Calendar from './pages/Calendar';
-import SeoDashboard from './pages/SeoDashboard';
+import Analytics from './pages/Analytics';
 import Docs from './pages/Docs';
 
 export default function App() {
@@ -49,7 +49,7 @@ export default function App() {
         <Route path="/create-workspace" element={<CreateWorkspace />} />
 
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route index element={<Dashboard />} />
+          <Route index element={<Content />} />
           <Route path="posts/:id" element={<PostEditor />} />
           <Route path="topics" element={<Topics />} />
           <Route path="topics/:id" element={<TopicDetail />} />
@@ -58,7 +58,8 @@ export default function App() {
           <Route path="seo-pages/:id" element={<SeoPageEditor />} />
           <Route path="approval" element={<ApprovalQueue />} />
           <Route path="calendar" element={<Calendar />} />
-          <Route path="seo" element={<SeoDashboard />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="seo" element={<Navigate to="/analytics" replace />} />
           <Route path="docs" element={<Docs />} />
         </Route>
 

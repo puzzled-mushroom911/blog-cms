@@ -23,6 +23,7 @@ const defaults = {
     { value: 'comparison', label: 'Comparison', color: 'bg-purple-50 text-purple-700' },
     { value: 'guide', label: 'Guide', color: 'bg-amber-50 text-amber-700' },
   ],
+  showContentPipeline: false,
 };
 
 const STORAGE_KEY = 'blog-cms-config';

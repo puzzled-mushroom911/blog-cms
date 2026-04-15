@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getConfig, saveConfig, saveWorkspaceConfig } from '../config';
 import { toast } from 'sonner';
-import { Save, RotateCcw, Database, Unplug, Trash2, Plus, BookOpen, Power, PowerOff, Loader2, Key, Copy, CheckCircle, Eye, EyeOff, Globe, Wifi, WifiOff } from 'lucide-react';
+import { Save, RotateCcw, Database, Unplug, Trash2, Plus, BookOpen, Power, PowerOff, Loader2, Key, Copy, CheckCircle, Eye, EyeOff, Globe, Wifi, WifiOff, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useConnection } from '../contexts/ConnectionContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -438,6 +438,29 @@ export default function Settings() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Content Pipeline */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Lightbulb className="w-5 h-5 text-indigo-600" />
+          <div>
+            <h2 className="font-semibold text-slate-900 text-sm">Content Pipeline</h2>
+            <p className="text-xs text-slate-500">Advanced topic research and keyword management</p>
+          </div>
+        </div>
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={values.showContentPipeline}
+            onChange={() => handleChange('showContentPipeline', !values.showContentPipeline)}
+            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+          />
+          <span className="text-sm text-slate-700">Show Content Pipeline in sidebar</span>
+        </label>
+        <p className="text-xs text-slate-400 mt-2">
+          When enabled, adds the Content Pipeline to the sidebar for manual topic research, keyword analysis, and content planning. When disabled, Claude automatically selects the best topics for your market.
+        </p>
       </div>
 
       {/* API Keys */}

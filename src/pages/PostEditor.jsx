@@ -5,6 +5,7 @@ import { useWorkspace } from '../contexts/WorkspaceContext';
 import { toast } from 'sonner';
 import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
+import SeoIntelligence from '../components/SeoIntelligence';
 import StatusBadge from '../components/StatusBadge';
 import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning, CheckCircle, Globe, Loader2, ExternalLink } from 'lucide-react';
 import { captureFeedback } from '../lib/feedback';
@@ -24,6 +25,7 @@ export default function PostEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [activePanel, setActivePanel] = useState('metadata');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editorNotes, setEditorNotes] = useState([]);
@@ -464,15 +466,49 @@ export default function PostEditor() {
         </div>
       </div>
 
-      {/* Metadata sidebar */}
+      {/* Sidebar with tabs */}
       {showSidebar && (
-        <aside className="w-80 border-l border-slate-200 bg-white flex-shrink-0 overflow-hidden">
-          <MetadataSidebar
-            post={post}
-            onChange={setPost}
-            onSave={handleSave}
-            saving={saving}
-          />
+        <aside className="w-80 border-l border-slate-200 bg-white flex-shrink-0 overflow-hidden flex flex-col">
+          {/* Tab bar */}
+          <div className="flex gap-4 px-4 pt-3 pb-2 border-b border-slate-100">
+            <button
+              onClick={() => setActivePanel('metadata')}
+              className={`text-xs font-medium pb-1 transition-colors ${
+                activePanel === 'metadata'
+                  ? 'border-b-2 border-slate-900 text-slate-900'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Metadata
+            </button>
+            <button
+              onClick={() => setActivePanel('seo')}
+              className={`text-xs font-medium pb-1 transition-colors ${
+                activePanel === 'seo'
+                  ? 'border-b-2 border-slate-900 text-slate-900'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              SEO
+            </button>
+          </div>
+
+          {/* Panel content */}
+          <div className="flex-1 overflow-hidden">
+            {activePanel === 'metadata' ? (
+              <MetadataSidebar
+                post={post}
+                onChange={setPost}
+                onSave={handleSave}
+                saving={saving}
+              />
+            ) : (
+              <SeoIntelligence
+                postId={id}
+                aiReasoning={post?.ai_reasoning}
+              />
+            )}
+          </div>
         </aside>
       )}
     </div>

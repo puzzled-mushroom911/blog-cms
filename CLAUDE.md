@@ -4,6 +4,7 @@
 
 This is a lightweight CMS for managing AI-generated blog posts. Built with React 19, Vite, Tailwind CSS 4, and Supabase.
 
+- **Repository:** [github.com/puzzled-mushroom911/blog-cms](https://github.com/puzzled-mushroom911/blog-cms)
 - **Directory:** `~/blog-cms/`
 - **Supabase project ID:** (your project ref — find it in your Supabase URL: `https://<project-id>.supabase.co`)
 - **Dev server:** `cd ~/blog-cms && npm run dev`
@@ -11,6 +12,17 @@ This is a lightweight CMS for managing AI-generated blog posts. Built with React
 ## "CMS" as Context Keyword
 
 When the user references **"CMS"** in conversation, it means this blog CMS and its Supabase tables. Use Supabase MCP to read/write data. Get the project ID from `.env` (`VITE_SUPABASE_URL` contains it).
+
+## MCP Server vs Prompts
+
+The MCP server (`bin/mcp-server.js` for Claude Desktop, `api/mcp.js` for Vercel) provides CRUD tools for posts, topics, and preferences. The **prompt templates** in `prompts/` are NOT served by the MCP server — they are reference files in the repo. Users need to clone the repo or access prompts from the [GitHub repository](https://github.com/puzzled-mushroom911/blog-cms/tree/main/prompts).
+
+Available prompts:
+- `prompts/generate-blog-post.md` — Turn a YouTube transcript into a blog post
+- `prompts/research-topic.md` — Research a keyword with DataForSEO and save to the CMS
+- `prompts/seo-review.md` — Audit a post for SEO quality before publishing
+- `prompts/setup-knowledge-base.md` — Set up your voice/style knowledge base
+- `prompts/build-public-website.md` — Build the public-facing reader site
 
 ## Tables
 
@@ -34,6 +46,9 @@ When the user references **"CMS"** in conversation, it means this blog CMS and i
 | content | JSONB | Array of content blocks (paragraph, heading, list, callout, quote, image, table, stat-cards, pros-cons, info-box, process-steps) |
 | status | text | draft, needs-review, published (see Status Transitions below) |
 | editor_notes | JSONB | Array of {blockIndex, text, author, createdAt, resolved} — inline comments on content blocks (see Resolving Editor Comments workflow) |
+| sources | JSONB | Array of {url, title, type, note} — research sources (internal only, not shown on public site). Types: reddit, youtube, government, news, data, mls, local, other |
+| ai_reasoning | text | How the AI researched and structured the content (internal only) |
+| workspace_id | UUID | FK to workspaces.id — scopes data per workspace |
 | created_at | timestamptz | Auto-set |
 | updated_at | timestamptz | Auto-set |
 
@@ -52,7 +67,10 @@ When the user references **"CMS"** in conversation, it means this blog CMS and i
 | status | text | researched, approved, discarded, writing, written |
 | research_data | JSONB | Full research payload (see structure below) |
 | blog_post_id | UUID | FK to blog_posts.id (set when blog is written) |
+| seo_page_id | UUID | FK to seo_pages.id (if topic feeds a programmatic page instead of a blog post) |
 | notes | text | Reviewer notes |
+| workflow_type | text | `editorial` (default) or other workflow types |
+| workspace_id | UUID | FK to workspaces.id |
 | created_at | timestamptz | Auto-set |
 | updated_at | timestamptz | Auto-updated via trigger |
 
@@ -92,6 +110,71 @@ When the user references **"CMS"** in conversation, it means this blog CMS and i
 
 JSONB column added to `blog_posts`. Set once on insert (same value as `content`), never updated. Used to diff against user edits for feedback capture. `NULL` for posts created before Phase 2.
 
+### `seo_pages` — Programmatic SEO pages
+
+For programmatic/templated pages (e.g. "moving from X to Y" pages) separate from editorial blog posts.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| slug | text | Unique, used in URLs |
+| page_type | text | Template type (e.g. "moving-from") |
+| title | text | Page title |
+| h1 | text | H1 heading (can differ from title) |
+| meta_description | text | SEO meta description |
+| keywords | text | SEO keywords |
+| data | JSONB | Structured data for the page template |
+| content | JSONB | Content blocks (same format as blog_posts) |
+| internal_links | JSONB | Links to related posts/pages |
+| status | text | draft, published |
+| scheduled_date | date | When to auto-publish (nullable) |
+| workspace_id | UUID | FK to workspaces.id |
+
+### `editorial_research` — Saved research sources
+
+Stores research material gathered during content creation. Link to the post it was used in.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| source_type | text | Type of source (e.g. reddit, youtube, government, news) |
+| source_name | text | Name/title of the source |
+| source_url | text | URL to the source |
+| title | text | Title of the research entry |
+| summary | text | Summary of the relevant content |
+| raw_content | text | Full text if captured |
+| tags | text[] | Topic tags for retrieval |
+| relevance_score | integer | 0-100 relevance rating |
+| used_in_post_id | UUID | FK to blog_posts.id (nullable) |
+
+### `blog_post_relations` — Internal linking
+
+Tracks internal links between posts for the internal linking graph.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | serial | Primary key |
+| from_slug | text | Source post slug |
+| to_slug | text | Target post slug |
+| unique | | (from_slug, to_slug) pair is unique |
+
+### `cms_block_comments` — Inline block comments
+
+Separate from `editor_notes` on the post. These are standalone comments on specific content blocks, stored in their own table.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| post_id | UUID | FK to blog_posts.id |
+| block_index | integer | Which content block |
+| comment_text | text | The comment |
+| status | text | open, resolved |
+| created_by | UUID | FK to auth.users |
+
+### Workspace scoping
+
+All major tables (`blog_posts`, `blog_topics`, `seo_pages`, `preferences`, `feedback`, `feedback_embeddings`) have a `workspace_id` column. When querying via the MCP server, data is automatically scoped to the authenticated workspace. When using Supabase MCP directly (via SQL), include `workspace_id` in your queries if the user has multiple workspaces.
+
 ## Topic Pipeline Workflows
 
 ### Saving researched topics → "put topics in the CMS"
@@ -125,29 +208,41 @@ When the user says they made changes in the CMS:
 
 When the user asks you to fix/resolve editor comments on a post:
 
-1. **Fetch the post with comments and content in one query:**
+1. **Find the post:**
 
 ```sql
-SELECT id, title, slug, status, editor_notes, content
+SELECT id, title, slug, status
 FROM blog_posts
 WHERE title ILIKE '%<search term>%'
   AND editor_notes IS NOT NULL
   AND editor_notes != '[]'::jsonb;
 ```
 
-2. **Identify unresolved comments:** Filter `editor_notes` for entries where `resolved = false`. Each note has a `blockIndex` (integer) pointing to a position in the `content` array.
+2. **Use the helper function to get comments with context** (returns block type, nearest heading, and text preview — no manual counting needed):
 
-3. **Map each comment to its content block:** Editor notes only store `blockIndex` — they do NOT include block type, heading context, or text previews. You must use the `content` array to look up what each `blockIndex` refers to. Count from 0. For long posts, present a summary to the user before making changes:
+```sql
+SELECT * FROM get_comments_with_context('<post_id>');
+```
+
+This returns: `block_index`, `block_type`, `nearest_heading`, `text_preview`, `comment_text`, `author`, `created_at`, `resolved`.
+
+3. **Identify unresolved comments:** Filter results where `resolved = false`. Present a summary to the user before making changes:
    - "Comment on block 21 (table under 'Flood Insurance' heading): ..."
    - "Comment on block 51 (paragraph under 'Sinkhole Coverage' heading): ..."
 
-4. **For each unresolved comment:**
+4. **Fetch the full content for editing:**
+
+```sql
+SELECT content, editor_notes FROM blog_posts WHERE id = '<post_id>';
+```
+
+5. **For each unresolved comment:**
    - Read the comment `.text` to understand what needs to change
    - Locate the block at `content[blockIndex]`
    - Apply the fix using `jsonb_set(content, '{<blockIndex>,<field>}', '<new value>')`
    - If the comment says to leave something alone or asks a question you can't answer, report it back to the user instead of guessing
 
-5. **Mark all addressed comments as resolved** using a single update:
+6. **Mark all addressed comments as resolved** using a single update:
 
 ```sql
 UPDATE blog_posts
@@ -160,7 +255,7 @@ SET
 WHERE id = '<post_id>';
 ```
 
-6. **Set status based on outcome:**
+7. **Set status based on outcome:**
    - All comments resolved → set status to `'published'` (unless the user says otherwise)
    - Some comments need user input → keep status as `'needs-review'` and report which ones
 
@@ -254,7 +349,7 @@ Save research data in this format. The structure supports both manual research a
 
 ## Content Block Types (for blog_posts.content)
 
-When writing blog posts, use these JSONB block types:
+When writing blog posts, use these JSONB block types. These field names match what the ContentRenderer component expects — use them exactly.
 
 - `{ "type": "paragraph", "text": "..." }`
 - `{ "type": "heading", "text": "..." }`
@@ -262,12 +357,12 @@ When writing blog posts, use these JSONB block types:
 - `{ "type": "list", "items": ["item1", "item2"] }`
 - `{ "type": "process-steps", "steps": [{ "title": "...", "text": "..." }] }`
 - `{ "type": "callout", "title": "...", "text": "..." }`
-- `{ "type": "quote", "text": "...", "author": "..." }`
-- `{ "type": "info-box", "title": "...", "text": "...", "variant": "blue|warning" }`
+- `{ "type": "quote", "text": "...", "attribution": "..." }`
+- `{ "type": "info-box", "content": "...", "variant": "warning" }` (variant optional, defaults to blue)
 - `{ "type": "image", "src": "...", "alt": "...", "caption": "..." }`
 - `{ "type": "table", "headers": ["..."], "rows": [["...", "..."]] }`
-- `{ "type": "stat-cards", "items": [{ "label": "...", "value": "..." }] }`
-- `{ "type": "pros-cons", "pros": ["..."], "cons": ["..."] }`
+- `{ "type": "stat-cards", "cards": [{ "number": "95%", "label": "...", "sublabel": "..." }] }`
+- `{ "type": "pros-cons", "pros": ["..."], "cons": ["..."], "prosTitle": "...", "consTitle": "..." }` (titles optional)
 
 ## Prompt Block Type
 

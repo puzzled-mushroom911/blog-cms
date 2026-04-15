@@ -8,30 +8,32 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeft,
-  FileText,
   Lightbulb,
-  Globe,
-  Inbox,
   CalendarDays,
   BarChart3,
   BookOpen,
 } from 'lucide-react';
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Blog Posts', icon: LayoutDashboard, end: true },
-  { to: '/topics', label: 'Content Pipeline', icon: Lightbulb },
-  { to: '/seo', label: 'SEO Dashboard', icon: BarChart3 },
-  { to: '/seo-pages', label: 'SEO Pages', icon: Globe },
-  { to: '/approval', label: 'HITL Queue', icon: Inbox },
+const CORE_NAV = [
+  { to: '/', label: 'Content', icon: LayoutDashboard, end: true },
   { to: '/calendar', label: 'Calendar', icon: CalendarDays },
+  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/docs', label: 'Docs', icon: BookOpen },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
+
+const PIPELINE_NAV = { to: '/topics', label: 'Content Pipeline', icon: Lightbulb };
 
 export default function Layout() {
   const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const config = getConfig();
+
+  // Build nav items: insert Content Pipeline after Content if enabled
+  const navItems = [...CORE_NAV];
+  if (config.showContentPipeline) {
+    navItems.splice(1, 0, PIPELINE_NAV);
+  }
 
   return (
     <div className="h-screen overflow-hidden bg-slate-50 flex">
@@ -52,7 +54,7 @@ export default function Layout() {
 
         {/* Nav */}
         <nav className="flex-1 py-3 px-2 space-y-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+          {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}

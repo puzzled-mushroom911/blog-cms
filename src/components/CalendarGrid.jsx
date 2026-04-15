@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { CheckCircle } from 'lucide-react';
 
 const STATUS_DOT = {
   draft: 'bg-slate-300',
@@ -19,7 +20,7 @@ function getFirstDayOfWeek(year, month) {
   return new Date(year, month - 1, 1).getDay();
 }
 
-export default function CalendarGrid({ year, month, items }) {
+export default function CalendarGrid({ year, month, items, onApprove }) {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
   const today = new Date();
@@ -66,15 +67,25 @@ export default function CalendarGrid({ year, month, items }) {
             const typeBg = TYPE_BG[item.content_type] || TYPE_BG.seo;
             const dotColor = STATUS_DOT[item.status] || STATUS_DOT.draft;
             return (
-              <Link
-                key={item.id}
-                to={linkTo}
-                className={`block text-[10px] leading-tight px-1.5 py-0.5 rounded border truncate hover:opacity-80 ${typeBg}`}
-                title={item.title}
-              >
-                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${dotColor}`} />
-                {item.title}
-              </Link>
+              <div key={item.id} className={`flex items-center gap-0.5 text-[10px] leading-tight px-1.5 py-0.5 rounded border ${typeBg}`}>
+                <Link
+                  to={linkTo}
+                  className="truncate flex-1 hover:opacity-80"
+                  title={item.title}
+                >
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${dotColor}`} />
+                  {item.title}
+                </Link>
+                {item.status !== 'published' && onApprove && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); onApprove(item); }}
+                    className="flex-shrink-0 p-0.5 rounded hover:bg-emerald-100 transition-colors"
+                    title="Approve & publish"
+                  >
+                    <CheckCircle className="w-3 h-3 text-emerald-500 hover:text-emerald-700" />
+                  </button>
+                )}
+              </div>
             );
           })}
           {dayItems.length > 3 && (

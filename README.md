@@ -192,10 +192,10 @@ values (
 
 ### Review in the CMS
 
-1. Open the CMS dashboard -- your new post appears with a "Needs Review" badge
+1. Open the CMS -- your new post appears in the unified Content feed with an "In Review" badge
 2. Click it to open the editor
 3. Review the rendered content preview
-4. Edit metadata in the sidebar (title, slug, category, SEO fields)
+4. Switch between the **Metadata** tab (title, slug, SEO fields) and **SEO** tab (keyword data, AI reasoning, content gaps)
 5. Make inline text edits by clicking on any text block
 6. Change status to "Published" when ready
 7. Hit Save
@@ -203,6 +203,50 @@ values (
 ### SEO review before publishing
 
 Use the prompt in `prompts/seo-review.md` to have Claude Code audit the post for SEO quality before you publish.
+
+## MCP Server (for AI Assistants)
+
+The CMS includes an MCP server that lets Claude Desktop, Claude Code, or any MCP-compatible AI assistant manage your blog posts and topics directly.
+
+### Install in Claude Desktop
+
+Add this to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "blog-cms": {
+      "command": "npx",
+      "args": ["-y", "github:puzzled-mushroom911/blog-cms"],
+      "env": {
+        "SUPABASE_URL": "https://your-project.supabase.co",
+        "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key"
+      }
+    }
+  }
+}
+```
+
+### Available MCP tools
+
+| Tool | Description |
+|------|-------------|
+| `list_posts` | List blog posts, optionally filter by status |
+| `get_post` | Get a post by ID or slug (includes full content) |
+| `create_post` | Create a new blog post with content blocks |
+| `update_post` | Partial update — only include fields to change |
+| `publish_post` | Set a post to "published" |
+| `list_topics` | List research pipeline topics |
+| `get_topic` | Get a topic with full research data |
+| `create_topic` | Create a topic with keyword data |
+| `update_topic` | Update topic status, notes, or research data |
+| `list_preferences` | List active writing style rules |
+| `create_preference` | Add a new style preference |
+| `get_workspace_info` | Workspace name, settings, and stats |
+
+### What about the prompts?
+
+The prompt templates in `prompts/` are **not served by the MCP server**. They are reference files you use directly with Claude Code or paste into Claude. The MCP server provides data access tools; the prompts provide content generation workflows.
 
 ## Customization
 
@@ -257,10 +301,11 @@ The CMS renders these JSON block types. Use them when generating content with Cl
 | `quote` | `text`, `attribution` | Block quote |
 | `image` | `src`, `alt`, `caption` | Image with optional caption |
 | `table` | `headers[]`, `rows[][]` | Data table |
-| `pros-cons` | `pros[]`, `cons[]` | Side-by-side pros and cons |
-| `info-box` | `content`, `variant?` | Info or warning box |
+| `pros-cons` | `pros[]`, `cons[]`, `prosTitle?`, `consTitle?` | Side-by-side pros and cons |
+| `info-box` | `content`, `variant?` | Info or warning box (variant: `"warning"` for amber, default is blue) |
 | `stat-cards` | `cards[{number, label, sublabel?}]` | Statistics grid |
 | `process-steps` | `steps[{title, text}]` | Numbered steps |
+| `prompt` | `text` | Internal instruction for Claude (NOT rendered on public site) |
 
 ## Project Structure
 
@@ -289,13 +334,17 @@ blog-cms/
     │   └── AuthContext.jsx      # Auth state management
     ├── pages/
     │   ├── Login.jsx            # Email/password login
-    │   ├── Dashboard.jsx        # Post list + stats + filters
-    │   ├── PostEditor.jsx       # Content preview + metadata editor
-    │   └── Settings.jsx         # Brand/site configuration
+    │   ├── Content.jsx          # Unified content feed (blog posts + SEO pages)
+    │   ├── PostEditor.jsx       # Content preview + metadata + SEO intelligence
+    │   ├── Analytics.jsx        # Keyword research insights + publishing velocity
+    │   ├── Calendar.jsx         # Content calendar with approve actions
+    │   ├── Topics.jsx           # Content Pipeline (advanced, toggle in Settings)
+    │   └── Settings.jsx         # Brand/site configuration + pipeline toggle
     └── components/
-        ├── Layout.jsx           # Sidebar navigation
+        ├── Layout.jsx           # Sidebar navigation (5 items)
         ├── ProtectedRoute.jsx   # Auth guard
-        ├── PostCard.jsx         # Post preview card
+        ├── ContentCard.jsx      # Unified content card (blog + SEO)
+        ├── SeoIntelligence.jsx  # SEO research panel in editor
         ├── ContentRenderer.jsx  # Block type renderer
         ├── MetadataSidebar.jsx  # Post metadata + SEO fields
         └── StatusBadge.jsx      # Status label component

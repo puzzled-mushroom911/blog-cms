@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { fetchCalendarItems } from '../lib/seoPages';
+import { fetchCalendarItems, updateSeoPage } from '../lib/seoPages';
 import { useWorkspace } from '../contexts/WorkspaceContext';
+import { useSupabase } from '../hooks/useSupabase';
 import CalendarGrid from '../components/CalendarGrid';
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -12,6 +14,7 @@ const MONTH_NAMES = [
 
 export default function Calendar() {
   const { workspaceId } = useWorkspace();
+  const supabase = useSupabase();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -47,6 +50,16 @@ export default function Calendar() {
   function goToday() {
     setYear(today.getFullYear());
     setMonth(today.getMonth() + 1);
+  }
+
+  async function handleApprove(item) {
+    if (item.content_type === 'seo') {
+      await updateSeoPage(item.id, { status: 'published' });
+    } else {
+      await supabase.from('blog_posts').update({ status: 'published' }).eq('id', item.id);
+    }
+    toast.success(`"${item.title}" published`);
+    loadItems(); // refresh
   }
 
   const blogCount = items.filter(i => i.content_type === 'blog').length;
@@ -106,7 +119,7 @@ export default function Calendar() {
           <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
         </div>
       ) : (
-        <CalendarGrid year={year} month={month} items={items} />
+        <CalendarGrid year={year} month={month} items={items} onApprove={handleApprove} />
       )}
     </div>
   );
