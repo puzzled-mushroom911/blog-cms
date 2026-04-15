@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getConfig, saveConfig, saveWorkspaceConfig } from '../config';
 import { toast } from 'sonner';
-import { Save, RotateCcw, Database, Unplug, Trash2, Plus, BookOpen, Power, PowerOff, Loader2, Key, Copy, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { Save, RotateCcw, Database, Unplug, Trash2, Plus, BookOpen, Power, PowerOff, Loader2, Key, Copy, CheckCircle, Eye, EyeOff, Globe, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useConnection } from '../contexts/ConnectionContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -35,9 +35,20 @@ export default function Settings() {
   const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
   const [copiedKey, setCopiedKey] = useState(false);
 
+  // WordPress connection state
+  const [wpSiteUrl, setWpSiteUrl] = useState('');
+  const [wpUsername, setWpUsername] = useState('');
+  const [wpAppPassword, setWpAppPassword] = useState('');
+  const [wpShowPassword, setWpShowPassword] = useState(false);
+  const [wpTesting, setWpTesting] = useState(false);
+  const [wpSaving, setWpSaving] = useState(false);
+  const [wpStatus, setWpStatus] = useState(null); // null | 'connected' | 'error'
+  const [wpStatusMessage, setWpStatusMessage] = useState('');
+
   useEffect(() => {
     loadPreferences();
     loadApiKeys();
+    loadWordPressSettings();
   }, []);
 
   async function loadPreferences() {
@@ -165,6 +176,99 @@ export default function Settings() {
     setCopiedKey(true);
     toast.success('Key copied to clipboard');
     setTimeout(() => setCopiedKey(false), 3000);
+  }
+
+  async function loadWordPressSettings() {
+    if (!workspaceId) return;
+    const { data: ws } = await supabase
+      .from('workspaces')
+      .select('settings')
+      .eq('id', workspaceId)
+      .single();
+    const wp = ws?.settings?.wordpress;
+    if (wp) {
+      setWpSiteUrl(wp.site_url || '');
+      setWpUsername(wp.username || '');
+      setWpAppPassword(wp.app_password || '');
+      setWpStatus('connected');
+      setWpStatusMessage('Credentials saved');
+    }
+  }
+
+  async function handleTestWordPress() {
+    if (!wpSiteUrl || !wpUsername || !wpAppPassword) {
+      toast.error('Fill in all three WordPress fields first');
+      return;
+    }
+    setWpTesting(true);
+    setWpStatus(null);
+    setWpStatusMessage('');
+    try {
+      const base = wpSiteUrl.replace(/\/+$/, '');
+      const credentials = btoa(`${wpUsername}:${wpAppPassword}`);
+      const resp = await fetch(`${base}/wp-json/wp/v2/users/me`, {
+        headers: { Authorization: `Basic ${credentials}` },
+      });
+      if (resp.ok) {
+        const user = await resp.json();
+        setWpStatus('connected');
+        setWpStatusMessage(`Connected as ${user.name || user.slug}`);
+        toast.success('WordPress connection verified');
+      } else {
+        let msg = `HTTP ${resp.status}`;
+        try {
+          const err = await resp.json();
+          if (err.message) msg = err.message;
+        } catch {}
+        setWpStatus('error');
+        setWpStatusMessage(msg);
+        toast.error('WordPress connection failed: ' + msg);
+      }
+    } catch (err) {
+      setWpStatus('error');
+      setWpStatusMessage(err.message || 'Network error');
+      toast.error('Could not reach WordPress site');
+    }
+    setWpTesting(false);
+  }
+
+  async function handleSaveWordPress() {
+    if (!workspaceId) {
+      toast.error('WordPress settings require a workspace');
+      return;
+    }
+    setWpSaving(true);
+
+    // Read current settings so we don't overwrite other keys
+    const { data: ws } = await supabase
+      .from('workspaces')
+      .select('settings')
+      .eq('id', workspaceId)
+      .single();
+
+    const currentSettings = ws?.settings || {};
+    const updatedSettings = {
+      ...currentSettings,
+      wordpress: {
+        site_url: wpSiteUrl.replace(/\/+$/, ''),
+        username: wpUsername,
+        app_password: wpAppPassword,
+      },
+    };
+
+    const { error } = await supabase
+      .from('workspaces')
+      .update({ settings: updatedSettings })
+      .eq('id', workspaceId);
+
+    setWpSaving(false);
+    if (error) {
+      toast.error('Failed to save WordPress settings: ' + error.message);
+    } else {
+      setWpStatus('connected');
+      setWpStatusMessage('Credentials saved');
+      toast.success('WordPress settings saved');
+    }
   }
 
   function handleChange(field, value) {
@@ -443,6 +547,102 @@ export default function Settings() {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* WordPress Connection */}
+      {workspaceId && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Globe className="w-5 h-5 text-blue-600" />
+            <div className="flex-1">
+              <h2 className="font-semibold text-slate-900 text-sm">WordPress Connection</h2>
+              <p className="text-xs text-slate-500">Publish posts directly to your WordPress site via the REST API.</p>
+            </div>
+            {wpStatus === 'connected' && (
+              <div className="flex items-center gap-1.5">
+                <Wifi className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-xs text-emerald-600 font-medium">{wpStatusMessage}</span>
+              </div>
+            )}
+            {wpStatus === 'error' && (
+              <div className="flex items-center gap-1.5">
+                <WifiOff className="w-3.5 h-3.5 text-red-500" />
+                <span className="text-xs text-red-600 font-medium">{wpStatusMessage}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3 mb-4">
+            <div>
+              <Label className="text-sm text-slate-700 mb-1">Site URL</Label>
+              <Input
+                type="url"
+                value={wpSiteUrl}
+                onChange={(e) => { setWpSiteUrl(e.target.value); setWpStatus(null); }}
+                placeholder="https://yoursite.com"
+              />
+            </div>
+            <div>
+              <Label className="text-sm text-slate-700 mb-1">Username</Label>
+              <Input
+                type="text"
+                value={wpUsername}
+                onChange={(e) => { setWpUsername(e.target.value); setWpStatus(null); }}
+                placeholder="Your WordPress username"
+              />
+            </div>
+            <div>
+              <Label className="text-sm text-slate-700 mb-1">Application Password</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type={wpShowPassword ? 'text' : 'password'}
+                  value={wpAppPassword}
+                  onChange={(e) => { setWpAppPassword(e.target.value); setWpStatus(null); }}
+                  placeholder="xxxx xxxx xxxx xxxx xxxx xxxx"
+                  className="flex-1"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 flex-shrink-0"
+                  onClick={() => setWpShowPassword(!wpShowPassword)}
+                >
+                  {wpShowPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-50 rounded-lg px-4 py-3 mb-4">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              <strong className="text-slate-700">How to get an Application Password:</strong> In your WordPress admin, go to{' '}
+              <span className="font-mono text-slate-600">Users &rarr; Profile</span>, scroll to{' '}
+              <span className="font-mono text-slate-600">Application Passwords</span>, enter a name (e.g. &quot;Blog CMS&quot;), and click{' '}
+              <span className="font-mono text-slate-600">Add New Application Password</span>. Copy the generated password.
+              Requires WordPress 5.6 or later — no plugins needed.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTestWordPress}
+              disabled={wpTesting || !wpSiteUrl || !wpUsername || !wpAppPassword}
+            >
+              {wpTesting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5" />}
+              Test Connection
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSaveWordPress}
+              disabled={wpSaving || !wpSiteUrl || !wpUsername || !wpAppPassword}
+            >
+              {wpSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+              Save
+            </Button>
+          </div>
         </div>
       )}
 
