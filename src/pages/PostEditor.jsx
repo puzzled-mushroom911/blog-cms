@@ -86,11 +86,13 @@ export default function PostEditor() {
 
       // Call our server endpoint — it handles WordPress credentials, HTML
       // conversion, and the WordPress API call securely server-side
-      const response = await fetch(`/api/v1/posts/${post.id}/publish-wordpress`, {
+      const response = await fetch('/api/v1/publish-wordpress', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
+        body: JSON.stringify({ post_id: post.id }),
       });
 
       const result = await response.json();
