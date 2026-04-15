@@ -127,7 +127,7 @@ function blockToHtml(block) {
       const border = isWarning ? '#f59e0b' : '#3b82f6';
       return (
         `<div style="background:${bg};border-left:4px solid ${border};padding:16px;margin:16px 0;border-radius:0 8px 8px 0;">` +
-        `<p>${block.content || ''}</p>` +
+        `<p>${escapeHtml(block.content || '')}</p>` +
         `</div>`
       );
     }
@@ -206,6 +206,12 @@ export async function publishToWordPress({
 }) {
   // Normalize site URL — strip trailing slash
   const base = siteUrl.replace(/\/+$/, '');
+
+  // Enforce HTTPS to protect credentials in transit
+  if (!base.startsWith('https://')) {
+    throw new Error('WordPress site URL must use HTTPS to protect your credentials.');
+  }
+
   const endpoint = `${base}/wp-json/wp/v2/posts`;
 
   const credentials = Buffer.from(`${username}:${appPassword}`).toString('base64');

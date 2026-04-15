@@ -1,4 +1,4 @@
-import { authenticate, sendError } from '../../../_lib/auth.js';
+import { authenticateAny, sendError } from '../../../_lib/auth.js';
 import { getServiceClient } from '../../../_lib/supabase.js';
 import { blocksToHtml, publishToWordPress } from '../../../_lib/wordpress.js';
 
@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return sendError(res, 405, 'Method not allowed');
   }
 
-  const auth = await authenticate(req);
+  const auth = await authenticateAny(req);
   if (auth.error) return sendError(res, auth.status, auth.error);
 
   const supabase = getServiceClient();

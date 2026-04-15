@@ -67,11 +67,11 @@ const WORKSPACE_SETTINGS_EXAMPLE = `// Workspace settings are stored in workspac
 // Access via Settings page or Supabase MCP
 
 {
-  "default_author": "Aaron & Aubrey Chand",
+  "default_author": "Your Name",
   "default_category": "Guide",
-  "site_url": "https://livinginstpetefl.com",
-  "site_name": "Living in St. Pete",
-  "revalidate_url": "https://livinginstpetefl.com/admin/api/revalidate",
+  "site_url": "https://yourdomain.com",
+  "site_name": "Your Site Name",
+  "revalidate_url": "https://yourdomain.com/admin/api/revalidate",
   "wordpress": {
     "site_url": "https://example.com",
     "username": "admin",
