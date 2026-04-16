@@ -158,6 +158,20 @@ supabase functions deploy generate-feedback-embedding
 
 **Note:** The CMS works without this step. Feedback entries will be stored but won't have embeddings until the function is deployed. You can deploy it at any time.
 
+## Three Ways to Use the CMS
+
+### 1. Manual — "Just Write"
+
+Tell Claude what to write. It creates a blog post with all fields populated — SEO metadata, sources, AI reasoning — and saves it as a draft. Open the Content feed, review it, publish.
+
+### 2. Collaborative — "Research First"
+
+Ask Claude to research keywords with DataForSEO before writing. Review the research in the Content Pipeline (toggle on in Settings), approve topics, then tell Claude to write. The SEO Intelligence panel in the editor shows all the keyword data alongside your content.
+
+### 3. Automated — "Full Autopilot"
+
+Set Claude on a schedule to research and write posts weekly. Drafts appear in the Content feed with full SEO data. Quick-approve from the Calendar or review in the editor. Claude learns from your edits over time.
+
 ## How to Use with Claude Code
 
 This is the recommended workflow for turning YouTube videos into blog posts:
@@ -192,13 +206,14 @@ values (
 
 ### Review in the CMS
 
-1. Open the CMS -- your new post appears in the unified Content feed with an "In Review" badge
-2. Click it to open the editor
-3. Review the rendered content preview
-4. Switch between the **Metadata** tab (title, slug, SEO fields) and **SEO** tab (keyword data, AI reasoning, content gaps)
-5. Make inline text edits by clicking on any text block
-6. Change status to "Published" when ready
-7. Hit Save
+1. Open the CMS -- your new post appears in the unified **Content feed** with a status badge (Draft, In Review, etc.) and a type badge (blue "Blog" or violet "SEO Page")
+2. Click it to open the post editor
+3. Review the rendered content preview on the left
+4. Use the **Metadata** tab on the right to edit title, slug, excerpt, category, tags, author, featured image, and meta description
+5. Switch to the **SEO** tab to see the **SEO Intelligence panel** -- AI reasoning, keyword data (volume, difficulty, CPC), related keywords, People Also Ask questions, SERP features, and content gaps from linked research topics
+6. Make inline text edits by clicking on any content block
+7. Change status to "Published" when ready
+8. Hit Save
 
 ### SEO review before publishing
 

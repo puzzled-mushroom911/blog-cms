@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, CheckCircle, FileText, ChevronDown, ChevronRight } from 'lucide-react';
+import { Copy, CheckCircle, FileText, ChevronDown, ChevronRight, PenLine, Search, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 function CopyButton({ text }) {
@@ -329,14 +329,188 @@ function PromptCard({ prompt }) {
   );
 }
 
+function WorkflowAccordion({ icon: Icon, iconBg, iconColor, label, title, children, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-5 py-4 flex items-start gap-3 text-left hover:bg-slate-50 transition-colors"
+      >
+        <div className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
+          <Icon className={`w-4 h-4 ${iconColor}`} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">{label}</p>
+          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+        </div>
+        {open
+          ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0 mt-1" />
+          : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0 mt-1" />
+        }
+      </button>
+      {open && (
+        <div className="px-5 pb-5 border-t border-slate-100 pt-4">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PromptsWorkflows() {
   return (
     <div className="space-y-8">
+      {/* Workflow Guides */}
+      <section>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+            <Zap className="w-5 h-5" />
+            Workflow Guides
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Three ways to use the CMS — from hands-on to fully automated. Expand each workflow to see the step-by-step process.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <WorkflowAccordion
+            icon={PenLine}
+            iconBg="bg-blue-100"
+            iconColor="text-blue-600"
+            label="Workflow 1 — Manual"
+            title={`"Just Write"`}
+            defaultOpen
+          >
+            <div className="space-y-3">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                The simplest path. Tell Claude what to write and it creates a complete post — content, metadata, sources, AI reasoning — all saved as a draft for you to review.
+              </p>
+              <div className="space-y-2.5 mt-3">
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Tell Claude:</strong> "Write me a blog post about [topic]"</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Claude loads your preferences</strong> and past corrections from the feedback system</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Claude creates the post</strong> via MCP with all fields (content blocks, sources, ai_reasoning, SEO metadata)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex-shrink-0 mt-0.5">4</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Post appears</strong> in the Content feed with a "Draft" badge</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex-shrink-0 mt-0.5">5</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Click to open the editor</strong> — review the content, then check the SEO tab for keyword intelligence</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex-shrink-0 mt-0.5">6</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Edit, approve, publish</strong></p>
+                </div>
+              </div>
+            </div>
+          </WorkflowAccordion>
+
+          <WorkflowAccordion
+            icon={Search}
+            iconBg="bg-violet-100"
+            iconColor="text-violet-600"
+            label="Workflow 2 — Collaborative"
+            title={`"Research First"`}
+          >
+            <div className="space-y-3">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Let Claude do the keyword research before writing. You review the data, pick the best topics, and then Claude writes posts informed by real SEO intelligence.
+              </p>
+              <div className="space-y-2.5 mt-3">
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Tell Claude:</strong> "What blog topics should we cover?" or "Research the keyword [X]"</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Claude uses DataForSEO</strong> to pull keyword data, SERP analysis, and competitor gaps</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Topics saved</strong> to the Content Pipeline (enable in Settings if not visible)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">4</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Review topics</strong> in the pipeline — approve the best ones</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">5</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Tell Claude:</strong> "Write the approved topics"</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">6</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Claude writes posts</strong> and links them to the research topics</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">7</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Review in Content feed</strong> — the SEO tab shows all the research data (keyword volume, difficulty, People Also Ask, content gaps)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex-shrink-0 mt-0.5">8</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Edit, approve, publish</strong></p>
+                </div>
+              </div>
+            </div>
+          </WorkflowAccordion>
+
+          <WorkflowAccordion
+            icon={Zap}
+            iconBg="bg-emerald-100"
+            iconColor="text-emerald-600"
+            label="Workflow 3 — Automated"
+            title={`"Full Autopilot"`}
+          >
+            <div className="space-y-3">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Set it and forget it. Claude runs on a schedule, finds keyword opportunities, writes posts, and queues them as drafts. You just review and approve.
+              </p>
+              <div className="space-y-2.5 mt-3">
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Set up Claude Code</strong> with a recurring schedule (or use /schedule)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Claude researches your market</strong> and finds keyword opportunities</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Claude writes posts automatically</strong> and saves them as Drafts</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex-shrink-0 mt-0.5">4</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Open the Content feed</strong> — new drafts appear with full SEO data</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex-shrink-0 mt-0.5">5</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Quick-approve</strong> from the Calendar or review in the editor</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex-shrink-0 mt-0.5">6</span>
+                  <p className="text-xs text-slate-600"><strong className="text-slate-800">Claude learns</strong> from your edits over time (feedback loop)</p>
+                </div>
+              </div>
+            </div>
+          </WorkflowAccordion>
+        </div>
+      </section>
+
+      {/* Prompt Templates */}
       <section>
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Prompts & Workflows
+            Prompt Templates
           </h2>
           <p className="text-xs text-slate-500 mt-1">
             These prompt templates guide Claude Code through the CMS workflows. Click any prompt to expand its full content, prerequisites, and example usage. Copy the prompt text and paste it into Claude Code.

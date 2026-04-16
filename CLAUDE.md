@@ -24,6 +24,32 @@ Available prompts:
 - `prompts/setup-knowledge-base.md` — Set up your voice/style knowledge base
 - `prompts/build-public-website.md` — Build the public-facing reader site
 
+## CMS Navigation
+
+The CMS has 5 sidebar items:
+
+| Page | Route | Purpose |
+|------|-------|---------|
+| **Content** | `/` | Unified feed of blog posts and SEO pages. Filter by status (Draft, In Review, Scheduled, Published) and type (Blog, SEO Page). Create new posts with "+ New Post" button. |
+| **Calendar** | `/calendar` | Monthly calendar view of scheduled content. Quick-approve buttons on draft/review items. |
+| **Analytics** | `/analytics` | Keyword opportunity maps, pipeline funnel, difficulty distribution, publishing velocity, top opportunities table. |
+| **Docs** | `/docs` | In-app documentation: Getting Started, Prompts & Workflows, Database Setup, Feedback Loop, Connect Website, Customization, API Reference. |
+| **Settings** | `/settings` | Database connection, content preferences (style rules), API keys, WordPress connection, Content Pipeline toggle, site configuration. |
+
+**Content Pipeline** (`/topics`) — available when toggled on in Settings. Advanced topic research and keyword management with statuses: idea → researched → approved → writing → written.
+
+### Three Workflow Types
+
+1. **Manual**: "Write me a blog about [topic]" → use `create_post` with all fields → appears in Content feed as Draft
+2. **Collaborative**: "What topics should we cover?" → research with DataForSEO → save with `create_topic` → user approves in CMS → write with `create_post` → link via `update_topic` with blog_post_id
+3. **Automated**: Research + write on a schedule → posts appear as Drafts → user reviews in Content feed or Calendar
+
+### Post Editor Sidebar
+
+Two tabs:
+- **Metadata** — title, slug, excerpt, category, tags, author, date, featured image, YouTube ID, keywords, meta description, sources, ai_reasoning
+- **SEO** — AI reasoning, keyword data (volume, difficulty, CPC), related keywords, People Also Ask, SERP features, content gaps (pulled from linked blog_topic)
+
 ## Tables
 
 ### `blog_posts` — Published blog content
