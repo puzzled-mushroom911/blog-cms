@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getConfig } from '../config';
+import OnboardingTour, { hasCompletedOnboarding } from './OnboardingTour';
 import {
   LayoutDashboard,
   Settings,
@@ -12,6 +13,7 @@ import {
   CalendarDays,
   BarChart3,
   BookOpen,
+  PlayCircle,
 } from 'lucide-react';
 
 const CORE_NAV = [
@@ -27,7 +29,16 @@ const PIPELINE_NAV = { to: '/topics', label: 'Content Pipeline', icon: Lightbulb
 export default function Layout() {
   const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const config = getConfig();
+
+  // Auto-open the setup tour once for new users. A tiny delay keeps it from flashing in
+  // before the first frame paints.
+  useEffect(() => {
+    if (hasCompletedOnboarding()) return;
+    const timer = setTimeout(() => setTourOpen(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Build nav items: insert Content Pipeline after Content if enabled
   const navItems = [...CORE_NAV];
@@ -76,6 +87,14 @@ export default function Layout() {
         {/* Bottom */}
         <div className="p-2 border-t border-slate-100 space-y-1">
           <button
+            onClick={() => setTourOpen(true)}
+            title="Replay the setup tour"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-50 w-full transition-colors"
+          >
+            <PlayCircle className="w-4.5 h-4.5 flex-shrink-0" />
+            {!collapsed && <span>Replay tour</span>}
+          </button>
+          <button
             onClick={() => setCollapsed(!collapsed)}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-50 w-full transition-colors"
           >
@@ -118,6 +137,8 @@ export default function Layout() {
       >
         <Outlet />
       </main>
+
+      <OnboardingTour open={tourOpen} onOpenChange={setTourOpen} />
     </div>
   );
 }

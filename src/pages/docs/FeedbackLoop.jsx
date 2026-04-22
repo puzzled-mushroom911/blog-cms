@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, CheckCircle, RefreshCw, Cpu, Sliders } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import VideoClip from '@/components/VideoClip';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -88,6 +89,14 @@ VALUES
 export default function FeedbackLoop() {
   return (
     <div className="space-y-8">
+      {/* Walkthrough clip */}
+      <VideoClip
+        src="/onboarding/04-feedback.mp4"
+        title="Why the feedback loop matters"
+        caption="Set this up so the corrections you give Claude actually land somewhere and get stored — that's how the CMS learns your voice over time."
+        duration="0:26"
+      />
+
       {/* Overview */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4">

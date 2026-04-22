@@ -1,26 +1,64 @@
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useConnection } from '../contexts/ConnectionContext';
-import { Database, Cloud, ArrowRight, CheckCircle } from 'lucide-react';
+import { Database, Cloud, ArrowRight, CheckCircle, PlayCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Welcome() {
   const { user } = useAuth();
   const { connected } = useConnection();
   const navigate = useNavigate();
+  const [showVideo, setShowVideo] = useState(false);
 
   if (user && connected) return <Navigate to="/" replace />;
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <img src="https://moonify.ai/moonify-logo.svg" alt="Moonify" className="h-10 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-slate-900">AI-Powered Blog CMS</h1>
           <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">
             Manage blog content created by your AI assistant. Review, edit, and publish — all from one place.
           </p>
+          <button
+            type="button"
+            onClick={() => setShowVideo(true)}
+            className="inline-flex items-center gap-1.5 mt-4 text-xs font-medium text-blue-600 hover:text-blue-700"
+          >
+            <PlayCircle className="w-4 h-4" />
+            Watch the 30-second tour
+          </button>
         </div>
+
+        {showVideo && (
+          <div
+            className="fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-4"
+            onClick={() => setShowVideo(false)}
+          >
+            <div
+              className="relative w-full max-w-3xl bg-slate-950 rounded-xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setShowVideo(false)}
+                className="absolute top-3 right-3 z-10 w-8 h-8 bg-slate-900/80 hover:bg-slate-900 rounded-full flex items-center justify-center text-white"
+                aria-label="Close video"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <video
+                src="/onboarding/01-intro.mp4"
+                autoPlay
+                controls
+                playsInline
+                className="w-full aspect-video bg-black"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col">

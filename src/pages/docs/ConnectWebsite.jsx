@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, CheckCircle, Globe, Database, FileCode2, Newspaper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import VideoClip from '@/components/VideoClip';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -147,6 +148,14 @@ export default function ConnectWebsite() {
 
   return (
     <div className="space-y-8">
+      {/* Walkthrough clip */}
+      <VideoClip
+        src="/onboarding/05-connect.mp4"
+        title="Three ways to connect your website"
+        caption="Supabase direct is the easiest. The REST API exists as a non-technical route but honestly makes things more complicated. WordPress is untested but the whole repo is open — set it up with Claude."
+        duration="1:23"
+      />
+
       <section>
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-2">
           <Globe className="w-5 h-5" />

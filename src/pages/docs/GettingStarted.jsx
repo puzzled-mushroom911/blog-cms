@@ -1,8 +1,19 @@
 import { Rocket, Database, Globe, ArrowRight, PenLine, Search, Zap, LayoutDashboard, Calendar, BarChart3, FileText, Settings } from 'lucide-react';
+import VideoClip from '@/components/VideoClip';
 
 export default function GettingStarted() {
   return (
     <div className="space-y-8">
+      {/* Walkthrough video */}
+      <section>
+        <VideoClip
+          src="/onboarding/01-intro.mp4"
+          title="Start here — the 30-second tour"
+          caption="Aaron walks through what this CMS is, what it does, and where to look first. Each tab below has its own short clip for that section."
+          duration="0:35"
+        />
+      </section>
+
       {/* What this CMS does */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4">
@@ -171,6 +182,17 @@ export default function GettingStarted() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* See the Content page in action */}
+      <section>
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">See It in Action</h2>
+        <VideoClip
+          src="/onboarding/08-content-demo.mp4"
+          title="Working with posts in the Content feed"
+          caption="Aaron opens a draft and walks through the editor — blocks (heading, paragraph, list, callout, prompt), image upload and Pexels, block comments, metadata, sources, AI reasoning, and the SEO panel."
+          duration="2:47"
+        />
       </section>
 
       {/* CMS Navigation */}

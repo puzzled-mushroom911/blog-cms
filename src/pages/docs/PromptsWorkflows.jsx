@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, CheckCircle, FileText, ChevronDown, ChevronRight, PenLine, Search, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import VideoClip from '@/components/VideoClip';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -361,6 +362,14 @@ function WorkflowAccordion({ icon: Icon, iconBg, iconColor, label, title, childr
 export default function PromptsWorkflows() {
   return (
     <div className="space-y-8">
+      {/* Walkthrough clip */}
+      <VideoClip
+        src="/onboarding/02-prompts.mp4"
+        title="Prompts & workflows — the quick tour"
+        caption="These prompts work together to create your SEO blog. You can read them here or grab the full versions from the GitHub repo, then drop them into your Claude Code setup."
+        duration="0:41"
+      />
+
       {/* Workflow Guides */}
       <section>
         <div className="mb-4">

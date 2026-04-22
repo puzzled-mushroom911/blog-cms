@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, CheckCircle, Terminal, Key, Blocks, FileCode2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import VideoClip from '@/components/VideoClip';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -86,6 +87,14 @@ export default function ApiReference() {
 
   return (
     <div className="space-y-8">
+      {/* Walkthrough clip */}
+      <VideoClip
+        src="/onboarding/07-api-mcp.mp4"
+        title="MCP server, API keys, and Pexels"
+        caption="The MCP server is set up for this but can be hit-or-miss — the way Aaron actually uses it is plugging Claude straight into Supabase. Generate an API key in Settings, drop it into Claude Code, and add a Pexels key if you want stock photos."
+        duration="1:48"
+      />
+
       {/* Quick Start — MCP */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4">

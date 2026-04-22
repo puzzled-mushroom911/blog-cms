@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, CheckCircle, Database, Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import VideoClip from '@/components/VideoClip';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -281,6 +282,14 @@ const TABLES = [
 export default function DatabaseSetup() {
   return (
     <div className="space-y-8">
+      {/* Walkthrough clip */}
+      <VideoClip
+        src="/onboarding/03-database.mp4"
+        title="Connect your Supabase project"
+        caption="You connect your own Supabase project to this CMS so Claude can edit the CMS just by talking to Supabase. Make sure Claude enables pgvector, then run the schema SQL — after that the tables are set up exactly how the CMS expects."
+        duration="0:49"
+      />
+
       {/* Setup steps */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4">

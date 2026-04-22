@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Copy, CheckCircle, Palette, Blocks, Settings, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import VideoClip from '@/components/VideoClip';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -99,6 +100,14 @@ INSERT INTO preferences (rule, category, workspace_id) VALUES
 export default function Customization() {
   return (
     <div className="space-y-8">
+      {/* Walkthrough clip */}
+      <VideoClip
+        src="/onboarding/06-customization.mp4"
+        title="Adapt the prompts and blocks to your niche"
+        caption="Tune the prompts, use custom content blocks, and work with Claude to make your blogs dynamic and deeper than a generic AI-written post."
+        duration="0:40"
+      />
+
       {/* Adapting prompts */}
       <section>
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4">
