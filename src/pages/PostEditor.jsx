@@ -7,7 +7,7 @@ import ContentRenderer from '../components/ContentRenderer';
 import MetadataSidebar from '../components/MetadataSidebar';
 import SeoIntelligence from '../components/SeoIntelligence';
 import StatusBadge from '../components/StatusBadge';
-import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning, CheckCircle, Globe, Loader2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Save, PanelRightOpen, PanelRightClose, Trash2, MessageSquareWarning, CheckCircle } from 'lucide-react';
 import { captureFeedback } from '../lib/feedback';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,13 +31,8 @@ export default function PostEditor() {
   const [editorNotes, setEditorNotes] = useState([]);
   const [originalContent, setOriginalContent] = useState(null);
 
-  // WordPress publishing state
-  const [wpConfigured, setWpConfigured] = useState(false);
-  const [wpPublishing, setWpPublishing] = useState(false);
-
   useEffect(() => {
     loadPost();
-    checkWordPressConfig();
   }, [id]);
 
   async function loadPost() {
@@ -60,68 +55,6 @@ export default function PostEditor() {
     }
     setEditorNotes(Array.isArray(data.editor_notes) ? data.editor_notes : []);
     setLoading(false);
-  }
-
-  async function checkWordPressConfig() {
-    if (!workspaceId) return;
-    const { data: ws } = await supabase
-      .from('workspaces')
-      .select('settings')
-      .eq('id', workspaceId)
-      .single();
-    const wp = ws?.settings?.wordpress;
-    setWpConfigured(!!(wp?.site_url && wp?.username && wp?.app_password));
-  }
-
-  async function handlePublishToWordPress() {
-    if (!post) return;
-    setWpPublishing(true);
-
-    try {
-      // Get the Supabase session token to authenticate with our server endpoint
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        toast.error('Session expired. Please sign in again.');
-        setWpPublishing(false);
-        return;
-      }
-
-      // Call our server endpoint — it handles WordPress credentials, HTML
-      // conversion, and the WordPress API call securely server-side
-      const response = await fetch('/api/v1/publish-wordpress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ post_id: post.id }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `HTTP ${response.status}`);
-      }
-
-      toast.success(
-        <div className="flex items-center gap-2">
-          <span>Published to WordPress as draft</span>
-          <a
-            href={result.wordpress_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline"
-          >
-            View <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>,
-        { duration: 8000 }
-      );
-    } catch (err) {
-      toast.error('WordPress publishing failed: ' + (err.message || 'Unknown error'));
-    }
-
-    setWpPublishing(false);
   }
 
   async function saveNotes(notes) {
@@ -373,17 +306,6 @@ export default function PostEditor() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            {wpConfigured && (
-              <button
-                onClick={handlePublishToWordPress}
-                disabled={wpPublishing}
-                className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                title="Publish to WordPress as draft"
-              >
-                {wpPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
-                {wpPublishing ? 'Sending...' : 'WordPress'}
-              </button>
-            )}
             {post.status !== 'published' && (
               <button
                 onClick={handlePublish}

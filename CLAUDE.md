@@ -34,7 +34,7 @@ The CMS has 5 sidebar items:
 | **Calendar** | `/calendar` | Monthly calendar view of scheduled content. Quick-approve buttons on draft/review items. |
 | **Analytics** | `/analytics` | Keyword opportunity maps, pipeline funnel, difficulty distribution, publishing velocity, top opportunities table. |
 | **Docs** | `/docs` | In-app documentation: Getting Started, Prompts & Workflows, Database Setup, Feedback Loop, Connect Website, Customization, API Reference. |
-| **Settings** | `/settings` | Database connection, content preferences (style rules), API keys, WordPress connection, Content Pipeline toggle, site configuration. |
+| **Settings** | `/settings` | Database connection, content preferences (style rules), API keys, Content Pipeline toggle, site configuration. |
 
 **Content Pipeline** (`/topics`) — available when toggled on in Settings. Advanced topic research and keyword management with statuses: idea → researched → approved → writing → written.
 

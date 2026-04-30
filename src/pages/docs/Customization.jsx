@@ -72,12 +72,7 @@ const WORKSPACE_SETTINGS_EXAMPLE = `// Workspace settings are stored in workspac
   "default_category": "Guide",
   "site_url": "https://yourdomain.com",
   "site_name": "Your Site Name",
-  "revalidate_url": "https://yourdomain.com/admin/api/revalidate",
-  "wordpress": {
-    "site_url": "https://example.com",
-    "username": "admin",
-    "app_password": "xxxx xxxx xxxx xxxx"
-  }
+  "revalidate_url": "https://yourdomain.com/admin/api/revalidate"
 }`;
 
 const STYLE_PREFERENCES_NICHE = `-- Real estate niche preferences
@@ -187,7 +182,6 @@ export default function Customization() {
             <p><strong className="text-slate-800">default_category:</strong> Pre-fills the category when creating new posts.</p>
             <p><strong className="text-slate-800">site_url:</strong> Used for internal link generation and sitemap references.</p>
             <p><strong className="text-slate-800">revalidate_url:</strong> The CMS POSTs here after saving published posts to trigger ISR cache refresh on your website.</p>
-            <p><strong className="text-slate-800">wordpress:</strong> WordPress publishing credentials (see Connect Your Website tab).</p>
           </div>
         </div>
       </section>

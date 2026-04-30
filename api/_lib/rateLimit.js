@@ -78,16 +78,6 @@ export const apiLimiter = rateLimit({
   name: 'api',
 });
 
-/**
- * WordPress publish limiter.
- * 10 publishes per 5 minutes per IP.
- */
-export const publishLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  max: 10,
-  name: 'publish',
-});
-
 function getClientIp(req) {
   return (
     req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||

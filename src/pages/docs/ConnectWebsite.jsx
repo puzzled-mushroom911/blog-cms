@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, CheckCircle, Globe, Database, FileCode2, Newspaper } from 'lucide-react';
+import { Copy, CheckCircle, Globe, Database, FileCode2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VideoClip from '@/components/VideoClip';
 
@@ -119,31 +119,12 @@ function usePosts() {
   return { posts, loading }
 }`;
 
-const WORDPRESS_INFO = `WordPress publishing lets you push content from the CMS to your WordPress site.
-
-Setup:
-1. Go to CMS Settings > WordPress Connection
-2. Enter your WordPress site URL
-3. Create a WordPress Application Password:
-   - WordPress Admin > Users > Your Profile
-   - Scroll to "Application Passwords"
-   - Enter a name and click "Add New Application Password"
-   - Copy the generated password
-4. Enter your WordPress username and application password
-5. Save and test the connection
-
-Usage:
-- From any published post, click "Publish to WordPress"
-- The CMS converts content blocks to WordPress HTML
-- The post appears as a draft (or published) on your WordPress site`;
-
 export default function ConnectWebsite() {
   const [activeOption, setActiveOption] = useState('supabase');
 
   const options = [
     { id: 'supabase', label: 'Supabase Direct', icon: Database },
     { id: 'api', label: 'REST API', icon: FileCode2 },
-    { id: 'wordpress', label: 'WordPress', icon: Newspaper },
   ];
 
   return (
@@ -151,8 +132,8 @@ export default function ConnectWebsite() {
       {/* Walkthrough clip */}
       <VideoClip
         src="/onboarding/05-connect.mp4"
-        title="Three ways to connect your website"
-        caption="Supabase direct is the easiest. The REST API exists as a non-technical route but honestly makes things more complicated. WordPress is untested but the whole repo is open — set it up with Claude."
+        title="Two ways to connect your website"
+        caption="Supabase direct is the easiest. The REST API exists as a non-technical route but honestly makes things more complicated."
         duration="1:23"
       />
 
@@ -162,7 +143,7 @@ export default function ConnectWebsite() {
           Connect Your Website
         </h2>
         <p className="text-xs text-slate-500 mb-4">
-          Three ways to get your published content onto your website. Choose the approach that fits your stack.
+          Two ways to get your published content onto your website. Choose the approach that fits your stack.
         </p>
 
         {/* Option toggle */}
@@ -265,39 +246,6 @@ export default function ConnectWebsite() {
           </div>
         )}
 
-        {/* WordPress */}
-        {activeOption === 'wordpress' && (
-          <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-800 mb-1">Option C: WordPress</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Publish directly from the CMS to your WordPress site. The CMS converts content blocks to WordPress-compatible HTML and pushes via the WordPress REST API.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-slate-600">Best for:</p>
-              <ul className="text-xs text-slate-500 space-y-1 ml-4">
-                <li className="flex items-start gap-2"><span className="text-slate-300">-</span> Existing WordPress websites</li>
-                <li className="flex items-start gap-2"><span className="text-slate-300">-</span> Users who want AI content creation with WordPress publishing</li>
-                <li className="flex items-start gap-2"><span className="text-slate-300">-</span> No code changes to your WordPress site</li>
-              </ul>
-            </div>
-
-            <div className="relative">
-              <pre className="text-xs bg-slate-950 text-slate-200 p-4 rounded-lg overflow-x-auto font-mono whitespace-pre-wrap">{WORDPRESS_INFO}</pre>
-              <div className="absolute top-2 right-2">
-                <CopyButton text={WORDPRESS_INFO} />
-              </div>
-            </div>
-
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <p className="text-xs text-amber-800">
-                <strong>Note:</strong> WordPress publishing converts content blocks to HTML. Some complex block types (stat-cards, process-steps) are rendered as styled HTML divs. Image upload to the WordPress media library is not yet supported — images must be hosted externally.
-              </p>
-            </div>
-          </div>
-        )}
       </section>
     </div>
   );

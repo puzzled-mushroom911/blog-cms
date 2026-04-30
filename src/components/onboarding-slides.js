@@ -36,7 +36,7 @@ export const ONBOARDING_SLIDES = [
     video: '/onboarding/05-connect.mp4',
     title: 'Connect your public website',
     description:
-      "Three options: Supabase direct (easiest — your site just reads from the same database), the REST API (exists as a non-technical route but honestly makes things more complicated), or WordPress. Pick what fits your stack.",
+      "Two options: Supabase direct (easiest — your site just reads from the same database) or the REST API (exists as a non-technical route but honestly makes things more complicated). Pick what fits your stack.",
   },
   {
     id: 'feedback-loop',

@@ -280,7 +280,7 @@ export default function GettingStarted() {
                 <Globe className="w-6 h-6 text-emerald-600" />
               </div>
               <p className="text-xs font-medium text-slate-700">Your Website</p>
-              <p className="text-[10px] text-slate-400">Supabase, API, or WordPress</p>
+              <p className="text-[10px] text-slate-400">Supabase or REST API</p>
             </div>
           </div>
 
@@ -295,7 +295,7 @@ export default function GettingStarted() {
               <strong className="text-slate-700">REST API</strong> provides standard HTTP endpoints for any tool or website that needs to read or write content.
             </p>
             <p>
-              <strong className="text-slate-700">Your website</strong> reads published posts from Supabase directly, via the REST API, or through WordPress publishing.
+              <strong className="text-slate-700">Your website</strong> reads published posts from Supabase directly or via the REST API.
             </p>
           </div>
         </div>
