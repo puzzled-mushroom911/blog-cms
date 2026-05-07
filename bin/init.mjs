@@ -48,16 +48,16 @@ const askYesNo = async (q, def = true) => {
   return a.startsWith("y");
 };
 
-function parseProjectRef(url) {
+export function parseProjectRef(url) {
   const m = url.match(/^https:\/\/([a-z0-9-]+)\.supabase\.co\/?$/i);
   return m ? m[1] : null;
 }
 
-async function fileExists(p) {
+export async function fileExists(p) {
   try { await access(p); return true; } catch { return false; }
 }
 
-async function runSchema({ ref, dbPassword }) {
+export async function runSchema({ ref, dbPassword }) {
   const { default: postgres } = await import("postgres");
   const schema = await readFile(SCHEMA_PATH, "utf8");
   const conn = `postgresql://postgres:${encodeURIComponent(dbPassword)}@db.${ref}.supabase.co:5432/postgres`;
@@ -69,7 +69,7 @@ async function runSchema({ ref, dbPassword }) {
   }
 }
 
-async function createCmsUser({ url, serviceRoleKey, email, password }) {
+export async function createCmsUser({ url, serviceRoleKey, email, password }) {
   const admin = createClient(url, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -82,8 +82,8 @@ async function createCmsUser({ url, serviceRoleKey, email, password }) {
   return data.user;
 }
 
-async function writeEnvFile({ url, anonKey }) {
-  const envPath = join(process.cwd(), ".env");
+export async function writeEnvFile({ url, anonKey, cwd = process.cwd() }) {
+  const envPath = join(cwd, ".env");
   const existing = (await fileExists(envPath)) ? await readFile(envPath, "utf8") : "";
   const lines = [];
   if (!/^VITE_SUPABASE_URL=/m.test(existing)) lines.push(`VITE_SUPABASE_URL=${url}`);
@@ -94,7 +94,7 @@ async function writeEnvFile({ url, anonKey }) {
   return { path: envPath, wrote: true };
 }
 
-function claudeDesktopConfigPath() {
+export function claudeDesktopConfigPath() {
   if (platform() === "darwin") {
     return join(homedir(), "Library", "Application Support", "Claude", "claude_desktop_config.json");
   }
@@ -104,8 +104,8 @@ function claudeDesktopConfigPath() {
   return join(homedir(), ".config", "Claude", "claude_desktop_config.json");
 }
 
-async function installMcp({ url, serviceRoleKey }) {
-  const cfgPath = claudeDesktopConfigPath();
+export async function installMcp({ url, serviceRoleKey, cfgPath: cfgOverride } = {}) {
+  const cfgPath = cfgOverride || claudeDesktopConfigPath();
   let cfg = {};
   if (await fileExists(cfgPath)) {
     try { cfg = JSON.parse(await readFile(cfgPath, "utf8")); } catch { cfg = {}; }
@@ -122,7 +122,7 @@ async function installMcp({ url, serviceRoleKey }) {
   return cfgPath;
 }
 
-async function main() {
+export async function main() {
   console.log("");
   console.log(c.bold("  blog-cms init"));
   console.log(c.dim("  Sets up Supabase, creates your first user, and wires up MCP."));
@@ -229,8 +229,14 @@ async function main() {
   rl.close();
 }
 
-main().catch((e) => {
-  console.error(c.red(`\n  Fatal: ${e.message}`));
-  rl.close();
-  process.exit(1);
-});
+// Auto-run only when invoked directly (`node bin/init.mjs`).
+// When imported by cli.mjs or the test harness, the caller decides.
+import { basename } from "node:path";
+const isMain = process.argv[1] && basename(process.argv[1]) === "init.mjs";
+if (isMain) {
+  main().catch((e) => {
+    console.error(c.red(`\n  Fatal: ${e.message}`));
+    rl.close();
+    process.exit(1);
+  });
+}

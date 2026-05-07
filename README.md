@@ -67,6 +67,23 @@ Your content lives in your own Supabase project. The hosted CMS just reads and w
 - **Zero maintenance** -- no Vercel deploys, no env vars to manage, no broken builds at 11pm
 - **Same database either way** -- if you ever want to self-host later, you point your own deploy at the same Supabase project. Nothing locks you in.
 
+## Headless Mode (CLI + Markdown Sync)
+
+Once initialized, `blog-cms` works as a proper command-line tool. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in your env (or have them in `.env`) and run any of:
+
+```bash
+npx blog-cms list                              # list posts (--status, --limit, --type=posts|topics)
+npx blog-cms get my-post-slug --format=md      # fetch one post as markdown
+npx blog-cms publish my-post-slug              # promote to published
+npx blog-cms unpublish my-post-slug            # demote to draft
+
+npx blog-cms pull ./content                    # export every post as ./content/<slug>.md
+npx blog-cms push ./content/my-post.md         # upsert one markdown file as a post
+npx blog-cms sync ./content                    # two-way sync between dir and Supabase
+```
+
+Markdown files use **YAML frontmatter** for metadata (slug, title, status, tags, etc.) and standard markdown for prose. Structured blocks (callouts, stat cards, pros/cons) round-trip via fenced code blocks tagged with their type, e.g. \`\`\`cms:callout. This means you can edit posts in any editor (Cursor, Obsidian, Vim) and `git diff` your content like any other source file.
+
 <details>
 <summary><strong>Want to self-host instead? (advanced)</strong></summary>
 
