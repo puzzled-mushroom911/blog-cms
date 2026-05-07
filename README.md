@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://moonify.ai/moonify-logo.svg" alt="Moonify" height="40">
   <br>
-  <em>Built by the <a href="https://moonify.ai">Moonify.ai</a> team</em>
+  <em>Built by the <a href="https://websites.moonify.ai">Moonify.ai</a> team</em>
 </p>
 
 A lightweight content management system for reviewing and publishing AI-generated blog posts. Built for content creators who use Claude Code (or any AI) to turn YouTube transcripts into SEO-optimized blog posts.
@@ -41,11 +41,9 @@ Both projects use the same Supabase project. The CMS writes to the database (aut
 
 The CMS is the review layer between AI-generated content and your live website. It gives you a clean interface to manage post status (draft / needs review / published), edit metadata and SEO fields, and preview how content will look before it goes live.
 
-## Two Ways to Get Started
+## Get Started in 5 Minutes
 
-### Option A: Use the Hosted Version (fastest)
-
-No cloning, no installs. Use the hosted CMS at **[cms.moonify.ai](https://cms.moonify.ai)**.
+Use the hosted CMS at **[cms.moonify.ai](https://cms.moonify.ai)** — no cloning, no installs, no DevOps.
 
 <a name="getting-started-hosted"></a>
 
@@ -55,19 +53,26 @@ No cloning, no installs. Use the hosted CMS at **[cms.moonify.ai](https://cms.mo
 4. **Connect** -- Go to [cms.moonify.ai](https://cms.moonify.ai), paste your Supabase Project URL and anon key, and sign in
 5. **Start generating content** -- Install [Claude Code](https://claude.ai/download) and use the prompts in the `prompts/` folder to generate blog posts from your YouTube transcripts
 
-That's it. Your content lives in your own Supabase project -- the hosted CMS just reads and writes to it.
+Your content lives in your own Supabase project. The hosted CMS just reads and writes to it — your data, your control. We never see your content.
 
-### Option B: Self-Host (full control)
+### Why hosted?
 
-Clone the repo and run it yourself. Follow the setup instructions below.
+- **Free, always up to date** -- new features ship to cms.moonify.ai automatically; no upgrade dance
+- **Zero maintenance** -- no Vercel deploys, no env vars to manage, no broken builds at 11pm
+- **Same database either way** -- if you ever want to self-host later, you point your own deploy at the same Supabase project. Nothing locks you in.
 
-## Prerequisites
+<details>
+<summary><strong>Want to self-host instead? (advanced)</strong></summary>
+
+The hosted CMS is the recommended path for almost everyone. Self-hosting is for developers who want to fork the code, customize the UI, or run it air-gapped.
+
+### Prerequisites
 
 - **Node.js 18+** -- [Download here](https://nodejs.org/) (free)
 - **Supabase account** -- [Sign up here](https://supabase.com/) (free tier is plenty)
 - **Claude Code** (optional but recommended) -- [Get it here](https://claude.ai/download)
 
-## Self-Host Setup (5 minutes)
+### Self-Host Setup (5 minutes)
 
 ### 1. Clone the repo
 
@@ -157,6 +162,8 @@ supabase functions deploy generate-feedback-embedding
 ```
 
 **Note:** The CMS works without this step. Feedback entries will be stored but won't have embeddings until the function is deployed. You can deploy it at any time.
+
+</details>
 
 ## Three Ways to Use the CMS
 

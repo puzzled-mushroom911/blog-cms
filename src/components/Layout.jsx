@@ -119,7 +119,7 @@ export default function Layout() {
         {/* Moonify branding */}
         <div className="px-3 py-3 border-t border-slate-100">
           <a
-            href="https://moonify.ai"
+            href="https://websites.moonify.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
