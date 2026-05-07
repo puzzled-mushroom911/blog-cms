@@ -41,17 +41,23 @@ Both projects use the same Supabase project. The CMS writes to the database (aut
 
 The CMS is the review layer between AI-generated content and your live website. It gives you a clean interface to manage post status (draft / needs review / published), edit metadata and SEO fields, and preview how content will look before it goes live.
 
-## Get Started in 5 Minutes
+## Get Started in One Command
 
-Use the hosted CMS at **[cms.moonify.ai](https://cms.moonify.ai)** — no cloning, no installs, no DevOps.
+```bash
+npx github:puzzled-mushroom911/blog-cms init
+```
 
-<a name="getting-started-hosted"></a>
+That's it. The interactive bootstrap will:
 
-1. **Create a free Supabase project** at [supabase.com](https://supabase.com/)
-2. **Run the database schema** -- In your Supabase SQL Editor, paste and run [`supabase/schema.sql`](https://github.com/puzzled-mushroom911/blog-cms/blob/main/supabase/schema.sql)
-3. **Create a CMS user** -- In Supabase > Authentication > Users, click "Add user", enter your email/password, check "Auto Confirm User"
-4. **Connect** -- Go to [cms.moonify.ai](https://cms.moonify.ai), paste your Supabase Project URL and anon key, and sign in
-5. **Start generating content** -- Install [Claude Code](https://claude.ai/download) and use the prompts in the `prompts/` folder to generate blog posts from your YouTube transcripts
+- Walk you through creating a Supabase project (or use your existing one)
+- Run the full database schema
+- Create your first CMS user
+- Write `.env` for you
+- Optionally install the MCP server into Claude Desktop
+
+You'll be prompted for four things from your Supabase dashboard (Settings → API and Settings → Database): **Project URL**, **anon key**, **service_role key**, **DB password**. Then your CMS is ready.
+
+When `init` finishes, sign in at **[cms.moonify.ai](https://cms.moonify.ai)** with the credentials you just created — or self-host (instructions below).
 
 Your content lives in your own Supabase project. The hosted CMS just reads and writes to it — your data, your control. We never see your content.
 
