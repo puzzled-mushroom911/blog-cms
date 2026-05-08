@@ -214,16 +214,18 @@ export async function main() {
   console.log(c.bold(c.green("  ✓ Done.")));
   console.log("");
   if (inClone) {
-    console.log(c.bold("  Next:"));
+    console.log(c.bold("  Run the CMS locally:"));
     console.log("    npm install");
     console.log("    npm run dev");
+    console.log("");
+    console.log(c.dim("  Then open http://localhost:5173"));
   } else {
-    console.log(c.bold("  Next: clone the repo and run it"));
+    console.log(c.bold("  Run the CMS locally:"));
     console.log("    git clone https://github.com/puzzled-mushroom911/blog-cms.git");
     console.log("    cd blog-cms && npm install && npm run dev");
+    console.log("");
+    console.log(c.dim("  Then open http://localhost:5173"));
   }
-  console.log("");
-  console.log(c.dim("  Or use the hosted CMS at https://cms.moonify.ai with the same credentials."));
   console.log("");
 
   rl.close();

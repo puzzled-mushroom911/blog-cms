@@ -137,7 +137,7 @@ export default function Welcome() {
           Open source on{' '}
           <a href="https://github.com/puzzled-mushroom911/blog-cms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700">GitHub</a>
           {' '}&middot;{' '}Built by{' '}
-          <a href="https://websites.moonify.ai" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700">Moonify AI</a>
+          <a href="https://github.com/puzzled-mushroom911/blog-cms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700">Moonify AI</a>
         </p>
       </div>
     </div>

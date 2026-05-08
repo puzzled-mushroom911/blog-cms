@@ -2,7 +2,7 @@
   "name": "@moonify/blog-cms",
   "version": "1.1.0",
   "type": "module",
-  "description": "A lightweight CMS for reviewing and publishing AI-generated blog posts. Built with React 19, Vite, Tailwind CSS 4, and Supabase.",
+  "description": "Local-first CMS for AI-generated blog posts. Runs on your machine, talks to Claude Code via MCP, content is plain markdown. React 19 + Vite + Tailwind CSS 4 + Supabase.",
   "bin": {
     "blog-cms": "./bin/cli.mjs"
   },

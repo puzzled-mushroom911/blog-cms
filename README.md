@@ -3,12 +3,20 @@
 <p align="center">
   <img src="https://moonify.ai/moonify-logo.svg" alt="Moonify" height="40">
   <br>
-  <em>Built by the <a href="https://websites.moonify.ai">Moonify.ai</a> team</em>
+  <em>Built by the <a href="https://github.com/puzzled-mushroom911/blog-cms">Moonify.ai</a> team</em>
 </p>
 
-A lightweight content management system for reviewing and publishing AI-generated blog posts. Built for content creators who use Claude Code (or any AI) to turn YouTube transcripts into SEO-optimized blog posts.
+A **local-first** content management system for AI-generated blog posts. Runs on your machine, uses your Supabase, talks to your Claude Code. No vendor lock-in, no SaaS subscription, no telemetry — your content lives on your laptop and in your database.
 
-**Stack:** React 19 + Vite + Tailwind CSS 4 + Supabase (all free tier)
+**Stack:** React 19 + Vite + Tailwind CSS 4 + Supabase (your project, free tier)
+
+## Why local-first?
+
+The agent era is local-first. Your AI tools (Claude Code, Cursor, Claude Desktop) run on your machine; your CMS shouldn't be one more SaaS login away. Blog CMS gives you:
+
+- **Your data, your machine.** Supabase is your project. The UI is your local dev server. Your content is plain markdown on disk you can `git diff`.
+- **Composable with your stack.** The MCP server is bundled in. Claude Code, Claude Desktop, or any MCP client can read and write your CMS. Edit posts in Cursor, Obsidian, or Vim — they're real markdown files.
+- **No upgrade pressure, no API limits, no surprises.** You own the version, you own the schedule, you own the runway.
 
 ## How It All Fits Together
 
@@ -41,31 +49,25 @@ Both projects use the same Supabase project. The CMS writes to the database (aut
 
 The CMS is the review layer between AI-generated content and your live website. It gives you a clean interface to manage post status (draft / needs review / published), edit metadata and SEO fields, and preview how content will look before it goes live.
 
-## Get Started in One Command
+## Get Started
 
 ```bash
-npx github:puzzled-mushroom911/blog-cms init
+git clone https://github.com/puzzled-mushroom911/blog-cms.git
+cd blog-cms
+npm install
+npx blog-cms init     # interactive Supabase + .env + (optional) Claude Desktop MCP
+npm run dev           # CMS at http://localhost:5173
 ```
 
-That's it. The interactive bootstrap will:
+Open `http://localhost:5173` and sign in. That's it — you're running the whole CMS locally.
 
-- Walk you through creating a Supabase project (or use your existing one)
-- Run the full database schema
-- Create your first CMS user
-- Write `.env` for you
-- Optionally install the MCP server into Claude Desktop
+The `init` flow asks for four things from your Supabase dashboard (Settings → API + Settings → Database): **Project URL**, **anon key**, **service_role key**, **DB password**. It applies the full schema, creates your first user, writes `.env`, and (optionally) installs the MCP server into your Claude Desktop config so Claude can read and write your CMS directly.
 
-You'll be prompted for four things from your Supabase dashboard (Settings → API and Settings → Database): **Project URL**, **anon key**, **service_role key**, **DB password**. Then your CMS is ready.
+### Prerequisites
 
-When `init` finishes, sign in at **[cms.moonify.ai](https://cms.moonify.ai)** with the credentials you just created — or self-host (instructions below).
-
-Your content lives in your own Supabase project. The hosted CMS just reads and writes to it — your data, your control. We never see your content.
-
-### Why hosted?
-
-- **Free, always up to date** -- new features ship to cms.moonify.ai automatically; no upgrade dance
-- **Zero maintenance** -- no Vercel deploys, no env vars to manage, no broken builds at 11pm
-- **Same database either way** -- if you ever want to self-host later, you point your own deploy at the same Supabase project. Nothing locks you in.
+- **Node.js 18+** -- [Download here](https://nodejs.org/) (free)
+- **Supabase account** -- [Sign up here](https://supabase.com/) (free tier; or run a self-hosted Supabase)
+- **Claude Code** (optional but recommended) -- [Get it here](https://claude.ai/download)
 
 ## Headless Mode (CLI + Markdown Sync)
 
@@ -84,109 +86,21 @@ npx blog-cms sync ./content                    # two-way sync between dir and Su
 
 Markdown files use **YAML frontmatter** for metadata (slug, title, status, tags, etc.) and standard markdown for prose. Structured blocks (callouts, stat cards, pros/cons) round-trip via fenced code blocks tagged with their type, e.g. \`\`\`cms:callout. This means you can edit posts in any editor (Cursor, Obsidian, Vim) and `git diff` your content like any other source file.
 
-<details>
-<summary><strong>Want to self-host instead? (advanced)</strong></summary>
+### Optional: deploy the feedback Edge Function
 
-The hosted CMS is the recommended path for almost everyone. Self-hosting is for developers who want to fork the code, customize the UI, or run it air-gapped.
-
-### Prerequisites
-
-- **Node.js 18+** -- [Download here](https://nodejs.org/) (free)
-- **Supabase account** -- [Sign up here](https://supabase.com/) (free tier is plenty)
-- **Claude Code** (optional but recommended) -- [Get it here](https://claude.ai/download)
-
-### Self-Host Setup (5 minutes)
-
-### 1. Clone the repo
+The feedback system captures your edits to learn your writing style over time. The Edge Function generates vector embeddings automatically. The CMS works without this step — feedback entries just won't have embeddings until you deploy it.
 
 ```bash
-git clone https://github.com/puzzled-mushroom911/blog-cms.git
-cd blog-cms
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Create a Supabase project
-
-1. Go to [app.supabase.com](https://app.supabase.com)
-2. Click **New Project**
-3. Give it a name (e.g., "blog-cms") and set a database password
-4. Wait for it to finish setting up (~1 minute)
-
-### 4. Run the database schema
-
-One file creates everything the CMS needs -- tables, RLS policies, functions, and triggers:
-
-1. In your Supabase dashboard, go to **SQL Editor**
-2. Click **New query**
-3. Copy and paste the entire contents of [`supabase/schema.sql`](supabase/schema.sql)
-4. Click **Run** -- it should return "Success. No rows returned."
-
-That single file creates 12 tables: profiles, workspaces, workspace_members, blog_posts, blog_post_relations, blog_topics, seo_pages, editorial_research, cms_block_comments, feedback, feedback_embeddings, preferences, and api_keys.
-
-### 5. Create your CMS user
-
-You need a Supabase Auth user to log into the CMS:
-
-1. In your Supabase dashboard, go to **Authentication** > **Users**
-2. Click **Add user** > **Create new user**
-3. Enter your email and a password
-4. Check "Auto Confirm User"
-5. Click **Create user**
-
-### 6. Configure environment variables
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your Supabase credentials:
-
-1. Go to **Settings** > **API** in your Supabase dashboard
-2. Copy your **Project URL** and **anon/public key**
-3. Paste them into `.env`:
-
-```
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
-```
-
-### 7. Start the dev server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173) and sign in with the user you created in step 5.
-
-### 8. Deploy the feedback Edge Function (optional)
-
-The feedback system captures your edits to learn your writing style over time. The Edge Function generates vector embeddings automatically.
-
-```bash
-# Install the Supabase CLI if you haven't
 npm install -g supabase
-
-# Link to your project
 supabase link --project-ref YOUR_PROJECT_REF
-
-# Deploy the function
 supabase functions deploy generate-feedback-embedding
-
-# Create a database webhook to trigger the function
-# In Supabase Dashboard → Database → Webhooks → Create new
-# Table: feedback
-# Events: INSERT
-# Function: generate-feedback-embedding
 ```
 
-**Note:** The CMS works without this step. Feedback entries will be stored but won't have embeddings until the function is deployed. You can deploy it at any time.
+Then in Supabase Dashboard → Database → Webhooks → Create new: Table `feedback`, Events `INSERT`, Function `generate-feedback-embedding`.
 
-</details>
+### Manual install (if you'd rather not use `npx blog-cms init`)
+
+If you prefer to set things up by hand: run [`supabase/schema.sql`](supabase/schema.sql) in your Supabase SQL Editor, create an Auth user (Authentication → Users → Add user with "Auto Confirm" checked), then `cp .env.example .env` and paste your Project URL and anon key into `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. `npm run dev` starts the CMS.
 
 ## Three Ways to Use the CMS
 
@@ -443,6 +357,9 @@ Yes. Create additional users in Supabase Auth. All authenticated users have full
 
 **How do I deploy the CMS?**
 Run `npm run build` and deploy the `dist/` folder to any static host (Vercel, Netlify, Cloudflare Pages, etc.). It is a client-side app -- no server needed.
+
+**Is there a hosted version?**
+A hosted instance runs at [cms.moonify.ai](https://cms.moonify.ai) for people who want to try the CMS without running anything locally. It uses the same code in this repo and reads/writes your own Supabase project (we don't see your data either way). The recommended path is local — you get more out of the markdown sync, the MCP server, and the agentic workflow when the CMS lives on your machine.
 
 ## License
 

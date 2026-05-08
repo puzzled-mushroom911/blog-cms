@@ -119,12 +119,12 @@ export default function Layout() {
         {/* Moonify branding */}
         <div className="px-3 py-3 border-t border-slate-100">
           <a
-            href="https://websites.moonify.ai"
+            href="https://github.com/puzzled-mushroom911/blog-cms"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors"
           >
-            {!collapsed ? 'Built by Moonify AI' : '·'}
+            {!collapsed ? 'Open source · GitHub' : '·'}
           </a>
         </div>
       </aside>
