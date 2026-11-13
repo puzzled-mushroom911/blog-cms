@@ -24,6 +24,9 @@ const defaults = {
     { value: 'guide', label: 'Guide', color: 'bg-amber-50 text-amber-700' },
   ],
   showContentPipeline: false,
+  // Optional link in the sidebar to another dashboard you use (e.g. a local video board at http://localhost:8770).
+  dashboardUrl: '',
+  dashboardLabel: 'Video Dashboard',
 };
 
 const STORAGE_KEY = 'blog-cms-config';

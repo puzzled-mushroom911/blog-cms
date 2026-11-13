@@ -14,6 +14,8 @@ import {
   BarChart3,
   BookOpen,
   PlayCircle,
+  Clapperboard,
+  ExternalLink,
 } from 'lucide-react';
 
 const CORE_NAV = [
@@ -42,6 +44,11 @@ export default function Layout() {
 
   // Build nav items: insert Content Pipeline after Content if enabled
   const navItems = [...CORE_NAV];
+  // Optional button to another dashboard (Settings → Dashboard Link, or VITE_DASHBOARD_URL in .env).
+  // Only http(s) addresses, so a typo can't become a javascript: link.
+  const dashboardUrl = (config.dashboardUrl || import.meta.env.VITE_DASHBOARD_URL || '').trim();
+  const dashboardLink = /^https?:\/\//i.test(dashboardUrl) ? dashboardUrl : '';
+  const dashboardLabel = (config.dashboardLabel || '').trim() || 'Video Dashboard';
   if (config.showContentPipeline) {
     navItems.splice(1, 0, PIPELINE_NAV);
   }
@@ -82,6 +89,23 @@ export default function Layout() {
               {!collapsed && <span>{label}</span>}
             </NavLink>
           ))}
+          {dashboardLink && (
+            <a
+              href={dashboardLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`${dashboardLabel} (opens in a new tab)`}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+            >
+              <Clapperboard className="w-4.5 h-4.5 flex-shrink-0" />
+              {!collapsed && (
+                <>
+                  <span className="flex-1 truncate">{dashboardLabel}</span>
+                  <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 text-slate-300" />
+                </>
+              )}
+            </a>
+          )}
         </nav>
 
         {/* Bottom */}

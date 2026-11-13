@@ -784,6 +784,22 @@ export default function Settings() {
           placeholder="https://youtube.com/@yourchannel"
         />
 
+        {/* Sidebar link to another dashboard */}
+        <Field
+          label="Dashboard Link"
+          description="Optional. Adds a button to the sidebar that opens this address in a new tab, like your video dashboard (http://localhost:8770 on the computer that runs it)."
+          value={values.dashboardUrl}
+          onChange={(v) => handleChange('dashboardUrl', v)}
+          placeholder="http://localhost:8770"
+        />
+        <Field
+          label="Dashboard Button Name"
+          description="What the sidebar button says"
+          value={values.dashboardLabel}
+          onChange={(v) => handleChange('dashboardLabel', v)}
+          placeholder="Video Dashboard"
+        />
+
         {/* Integrations divider */}
         <div className="pt-2 border-t border-slate-100">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
